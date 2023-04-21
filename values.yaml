@@ -2,6 +2,79 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Metrics-Server Config
+metrics-server:
+  enabled: true
+  # -- Number of replicas
+  replicas: 2
+  defaultArgs:
+    - --cert-dir=/tmp
+    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+    - --kubelet-use-node-status-port
+    - --metric-resolution=15s
+    # !!! Needed because the kubelets of CGRD don't seem to have a valid Cert with the IP in it.
+    - --kubelet-insecure-tls
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - metrics-server
+        topologyKey: kubernetes.io/hostname
+
+# Grafana Config
+grafana:
+  enabled: true
+  # Default grafana login credentials
+  adminUser: grafanaAdmin
+  adminPassword: superSecretPassword
+  # Grafana service monitor
+  serviceMonitor:
+    enabled: false
+    namespace: clops-monitoring
+  # Grafana ingress configuration
+  ingress:
+    # -- Specifies whether an ingress should be created
+    enabled: true
+    # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
+    ingressClassName: nginx
+    # -- Annotations for the ingress
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubernetes.io/tls-acme: "true"
+    # -- Hosts configuration for the ingress
+    hosts:
+      - "grafana.your.doma.in"
+    # -- TLS configuration for the ingress
+    tls:
+    - hosts:
+      - "grafana.your.doma.in"
+      secretName: grafana-ingress-tls
+  # Storage configuration
+  persistence:
+    enabled: false
+    storageClassName: rook-ceph-block
+    size: 15Gi
+  # Data source configuration
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        # "monitoring" should be the namespace of prometheus
+        url: "http://prometheus-prometheus.monitoring.svc:9090"
+        isDefault: true
+      - name: Loki
+        type: loki
+        # "monitoring" should be the namespace of loki
+        url: "http://loki.monitoring.svc:3100"
+        isDefault: false
+
 # Loki Config
 loki:
   enabled: true
