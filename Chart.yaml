@@ -27,7 +27,9 @@ dependencies:
   - name: metrics-server
     version: "3.8.4"
     repository: "https://kubernetes-sigs.github.io/metrics-server/"
-    
+    condition: metrics-server.enabled
+
   - name: grafana
     version: "6.54.0"
     repository: "https://grafana.github.io/helm-charts"
+    condition: grafana.enabled
