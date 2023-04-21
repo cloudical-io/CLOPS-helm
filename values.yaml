@@ -74,3 +74,70 @@ grafana:
         # "monitoring" should be the namespace of loki
         url: "http://loki.monitoring.svc:3100"
         isDefault: false
+
+# Loki Config
+loki:
+  enabled: true
+  # Loki Configuration
+  loki:
+    # -- Storage config. Providing this will automatically populate all necessary storage configs in the templated config.
+    storage:
+      bucketNames:
+        chunks: loki-test-clops-chunks
+        ruler: loki-test-clops-ruler
+        admin: loki-test-clops-admin
+      type: s3
+      s3:
+        s3: null
+        endpoint: "https://loki.your.doma.in"
+        region: "region-1"
+        accessKeyId: "clops-test-key"
+        secretAccessKey: "SUPERSECRETKEY"
+      gcs:
+        chunkBufferSize: 0
+        requestTimeout: "0s"
+        enableHttp2: true
+      azure:
+        accountName: null
+        accountKey: null
+        useManagedIdentity: false
+        userAssignedId: null
+        requestTimeout: null
+      filesystem:
+        chunks_directory: /var/loki/chunks
+        rules_directory: /var/loki/rules
+  # Configuration for the gateway
+  gateway:
+    # -- Specifies whether the gateway should be enabled
+    enabled: true
+    # -- Number of replicas for the gateway
+    replicas: 1
+    # Gateway ingress configuration
+    ingress:
+      # -- Specifies whether an ingress for the gateway should be created
+      enabled: true
+      # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
+      ingressClassName: nginx
+      # -- Annotations for the gateway ingress
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-live-cloudicalnet
+      # -- Hosts configuration for the gateway ingress
+      hosts:
+        - host: loki.your.doma.in
+          paths:
+            - path: /
+              # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
+              pathType: Prefix
+      # -- TLS configuration for the gateway ingress
+      tls:
+        - secretName: loki-gateway-tls
+          hosts:
+            - loki.your.doma.in
+    # Basic auth configuration
+    basicAuth:
+      # -- Enables basic authentication for the gateway
+      enabled: true
+      # -- The basic auth username for the gateway
+      username: testloki
+      # -- The basic auth password for the gateway
+      password: testlokipassword
