@@ -2,81 +2,69 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
-
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-service:
-  type: ClusterIP
-  port: 80
-
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+# Loki Config
+loki:
+  enabled: true
+  # Loki Configuration
+  loki:
+    # -- Storage config. Providing this will automatically populate all necessary storage configs in the templated config.
+    storage:
+      bucketNames:
+        chunks: loki-test-clops-chunks
+        ruler: loki-test-clops-ruler
+        admin: loki-test-clops-admin
+      type: s3
+      s3:
+        s3: null
+        endpoint: "https://loki.your.doma.in"
+        region: "region-1"
+        accessKeyId: "clops-test-key"
+        secretAccessKey: "SUPERSECRETKEY"
+      gcs:
+        chunkBufferSize: 0
+        requestTimeout: "0s"
+        enableHttp2: true
+      azure:
+        accountName: null
+        accountKey: null
+        useManagedIdentity: false
+        userAssignedId: null
+        requestTimeout: null
+      filesystem:
+        chunks_directory: /var/loki/chunks
+        rules_directory: /var/loki/rules
+  # Configuration for the gateway
+  gateway:
+    # -- Specifies whether the gateway should be enabled
+    enabled: true
+    # -- Number of replicas for the gateway
+    replicas: 1
+    # Gateway ingress configuration
+    ingress:
+      # -- Specifies whether an ingress for the gateway should be created
+      enabled: true
+      # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
+      ingressClassName: nginx
+      # -- Annotations for the gateway ingress
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-live-cloudicalnet
+      # -- Hosts configuration for the gateway ingress
+      hosts:
+        - host: loki.your.doma.in
+          paths:
+            - path: /
+              # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
+              pathType: Prefix
+      # -- TLS configuration for the gateway ingress
+      tls:
+        - secretName: loki-gateway-tls
+          hosts:
+            - loki.your.doma.in
+    # Basic auth configuration
+    basicAuth:
+      # -- Enables basic authentication for the gateway
+      enabled: true
+      # -- The basic auth username for the gateway
+      username: testloki
+      # -- The basic auth password for the gateway
+      password: testlokipassword
