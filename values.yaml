@@ -3,12 +3,30 @@
 # Declare variables to be passed into your templates.
 metrics-server:
   replicas: 2
+  defaultArgs:
+    - --cert-dir=/tmp
+    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+    - --kubelet-use-node-status-port
+    - --metric-resolution=15s
+    # !!! Needed because the kubelets of CGRD don't seem to have a valid Cert with the IP in it.
+    - --kubelet-insecure-tls
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - metrics-server
+        topologyKey: kubernetes.io/hostname
 
 grafana:
   adminUser: grafanaAdmin
   adminPassword: superSecretPassword
   serviceMonitor:
-    enabled: true
+    enabled: false
+    namespace: clops-monitoring
   ingress:
     enabled: true
     ingressClassName: nginx
@@ -39,126 +57,126 @@ grafana:
         # "monitoring" should be the namespace of loki
         url: "http://loki.monitoring.svc:3100"
         isDefault: false
-  dashboardProviders:
-    dashboardproviders.yaml:
-      apiVersion: 1
-      providers:
-      - name: 'default'
-        orgId: 1
-        folder: ''
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/default
-  dashboards:
-    default:
-      prometheus-stats:
-        gnetId: 2
-        revision: 2
-        datasource: Prometheus
-      kubernetes-volumes:
-        gnetId: 11454
-        datasource: Prometheus
-      kubernetes-namespaces:
-        gnetId: 11455
-        datasource: Prometheus
-      kubernetes-deployments:
-        gnetId: 8588
-        datasource: Prometheus
-      node-exporter-full:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/node-exporter-full.json
-      dashboards-apiserver:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/vanillastack-kubernetes-api-server.json
-      dashboards-cluster-total:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/cluster-total.json
-      dashboards-controller-manager:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/controller-manager.json
-      dashboards-etcd:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/etcd.json
-      dashboards-k8s-coredns:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-coredns.json
-      dashboards-k8s-resources-cluster:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-cluster.json
-      dashboards-k8s-resources-namespace:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-namespace.json
-      dashboards-k8s-resources-node:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-node.json
-      dashboards-k8s-resources-pod:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-pod.json
-      dashboards-k8s-resources-workload:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-workload.json
-      dashboards-k8s-resources-workloads-namespace:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-workloads-namespace.json
-      dashboards-kubelet:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/kubelet.json
-      dashboards-namespace-by-pod:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/namespace-by-pod.json
-      dashboards-namespace-by-workload:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/namespace-by-workload.json
-      dashboards-node-cluster-rsrc-use:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/node-cluster-rsrc-use.json
-      dashboards-node-rsrc-use:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/node-rsrc-use.json
-      dashboards-nodes:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/nodes.json
-      dashboards-persistentvolumesusage:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/persistentvolumesusage.json
-      dashboards-pod-total:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/pod-total.json
-      dashboards-prometheus:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/prometheus.json
-      dashboards-proxy:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/proxy.json
-      dashboards-scheduler:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/scheduler.json
-      dashboards-statefulset:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/statefulset.json
-      dashboards-workload-total:
-        datasource: Prometheus
-        url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/workload-total.json
-      ceph-pools:
-        gnetId: 5342
-        datasource: Prometheus
-      ceph-osd:
-        gnetId: 5336
-        datasource: Prometheus
-      ceph-cluster:
-        gnetId: 2842
-        datasource: Prometheus
-      loki:
-        gnetId: 12611
-        datasource: Loki
-      cilium:
-        gnetId: 6658
-        datasource: Prometheus
-      cilium-v1.8-metrics:
-        gnetId: 13540
-        datasource: Prometheus
-      cilium-v1.9-metrics:
-        gnetId: 13541
-        fatasource: Prometheus
+  # dashboardProviders:
+  #   dashboardproviders.yaml:
+  #     apiVersion: 1
+  #     providers:
+  #     - name: 'default'
+  #       orgId: 1
+  #       folder: ''
+  #       type: file
+  #       disableDeletion: false
+  #       editable: true
+  #       options:
+  #         path: /var/lib/grafana/dashboards/default
+  # dashboards:
+  #   default:
+  #     prometheus-stats:
+  #       gnetId: 2
+  #       revision: 2
+  #       datasource: Prometheus
+  #     kubernetes-volumes:
+  #       gnetId: 11454
+  #       datasource: Prometheus
+  #     kubernetes-namespaces:
+  #       gnetId: 11455
+  #       datasource: Prometheus
+  #     kubernetes-deployments:
+  #       gnetId: 8588
+  #       datasource: Prometheus
+  #     node-exporter-full:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/node-exporter-full.json
+  #     dashboards-apiserver:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/vanillastack-kubernetes-api-server.json
+  #     dashboards-cluster-total:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/cluster-total.json
+  #     dashboards-controller-manager:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/controller-manager.json
+  #     dashboards-etcd:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/etcd.json
+  #     dashboards-k8s-coredns:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-coredns.json
+  #     dashboards-k8s-resources-cluster:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-cluster.json
+  #     dashboards-k8s-resources-namespace:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-namespace.json
+  #     dashboards-k8s-resources-node:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-node.json
+  #     dashboards-k8s-resources-pod:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-pod.json
+  #     dashboards-k8s-resources-workload:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-workload.json
+  #     dashboards-k8s-resources-workloads-namespace:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/k8s-resources-workloads-namespace.json
+  #     dashboards-kubelet:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/kubelet.json
+  #     dashboards-namespace-by-pod:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/namespace-by-pod.json
+  #     dashboards-namespace-by-workload:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/namespace-by-workload.json
+  #     dashboards-node-cluster-rsrc-use:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/node-cluster-rsrc-use.json
+  #     dashboards-node-rsrc-use:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/node-rsrc-use.json
+  #     dashboards-nodes:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/nodes.json
+  #     dashboards-persistentvolumesusage:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/persistentvolumesusage.json
+  #     dashboards-pod-total:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/pod-total.json
+  #     dashboards-prometheus:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/prometheus.json
+  #     dashboards-proxy:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/proxy.json
+  #     dashboards-scheduler:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/scheduler.json
+  #     dashboards-statefulset:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/statefulset.json
+  #     dashboards-workload-total:
+  #       datasource: Prometheus
+  #       url: https://repo.vanillastack.cloudical.net/vanillastack/grafana/dashboards/workload-total.json
+  #     ceph-pools:
+  #       gnetId: 5342
+  #       datasource: Prometheus
+  #     ceph-osd:
+  #       gnetId: 5336
+  #       datasource: Prometheus
+  #     ceph-cluster:
+  #       gnetId: 2842
+  #       datasource: Prometheus
+  #     loki:
+  #       gnetId: 12611
+  #       datasource: Loki
+  #     cilium:
+  #       gnetId: 6658
+  #       datasource: Prometheus
+  #     cilium-v1.8-metrics:
+  #       gnetId: 13540
+  #       datasource: Prometheus
+  #     cilium-v1.9-metrics:
+  #       gnetId: 13541
+  #       fatasource: Prometheus
