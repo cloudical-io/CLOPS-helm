@@ -1,0 +1,9 @@
+dependencies:
+- name: metrics-server
+  repository: https://kubernetes-sigs.github.io/metrics-server/
+  version: 3.8.4
+- name: grafana
+  repository: https://grafana.github.io/helm-charts
+  version: 6.54.0
+digest: sha256:169a112213d4361d5f1da198de0bba9c83ed0790a9c5ba9ee01e26a267ba6c84
+generated: "2023-04-20T11:48:17.768294689+02:00"

@@ -22,3 +22,12 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.16.0"
+
+dependencies:
+  - name: metrics-server
+    version: "3.8.4"
+    repository: "https://kubernetes-sigs.github.io/metrics-server/"
+    
+  - name: grafana
+    version: "6.54.0"
+    repository: "https://grafana.github.io/helm-charts"
