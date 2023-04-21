@@ -17,13 +17,13 @@ metrics-server:
   affinity:
     podAntiAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: app.kubernetes.io/name
-            operator: In
-            values:
-            - metrics-server
-        topologyKey: kubernetes.io/hostname
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - metrics-server
+          topologyKey: kubernetes.io/hostname
 
 # Grafana Config
 grafana:
@@ -51,9 +51,9 @@ grafana:
       - "grafana.your.doma.in"
     # -- TLS configuration for the ingress
     tls:
-    - hosts:
-      - "grafana.your.doma.in"
-      secretName: grafana-ingress-tls
+      - hosts:
+          - "grafana.your.doma.in"
+        secretName: grafana-ingress-tls
   # Storage configuration
   persistence:
     enabled: false
@@ -64,16 +64,16 @@ grafana:
     datasources.yaml:
       apiVersion: 1
       datasources:
-      - name: Prometheus
-        type: prometheus
-        # "monitoring" should be the namespace of prometheus
-        url: "http://prometheus-prometheus.monitoring.svc:9090"
-        isDefault: true
-      - name: Loki
-        type: loki
-        # "monitoring" should be the namespace of loki
-        url: "http://loki.monitoring.svc:3100"
-        isDefault: false
+        - name: Prometheus
+          type: prometheus
+          # "monitoring" should be the namespace of prometheus
+          url: "http://prometheus-prometheus.monitoring.svc:9090"
+          isDefault: true
+        - name: Loki
+          type: loki
+          # "monitoring" should be the namespace of loki
+          url: "http://loki.monitoring.svc:3100"
+          isDefault: false
 
 # Loki Config
 loki:
@@ -141,3 +141,171 @@ loki:
       username: testloki
       # -- The basic auth password for the gateway
       password: testlokipassword
+
+# Prometheus Blackbox Exporter Config
+prometheus-blackbox-exporter:
+  # -- enables or disable whole component
+  enabled: true
+
+  # if the configuration is managed as secret outside the chart, using SealedSecret for example,
+  # provide the name of the secret here. If secretConfig is set to true, configExistingSecretName will be ignored
+  # in favor of the config value.
+  configExistingSecretName: ""
+  # Store the configuration as a `Secret` instead of a `ConfigMap`, useful in case it contains sensitive data
+  secretConfig: false
+  config:
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          follow_redirects: true
+          preferred_ip_protocol: "ip4"
+          tls_config:
+            insecure_skip_verify: true
+      # client.example
+      ## ENV
+      # http_2xx_application_name:
+      #   prober: http
+      #   timeout: 5s
+      #   http:
+      #     method: GET
+      #     valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      #     no_follow_redirects: false
+      #     preferred_ip_protocol: "ip4"
+      #     tls_config:
+      #       insecure_skip_verify: true
+      #     basic_auth:
+      #       username: "username"
+      #       password: "userpassword"
+      # GitLab and others when "healthy" do a redirect to the login provider
+      http_redirect_location_set:
+        prober: http
+        timeout: 5s
+        http:
+          method: GET
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          no_follow_redirects: true
+          preferred_ip_protocol: "ip4"
+          tls_config:
+            insecure_skip_verify: false
+          valid_status_codes: [302]
+          fail_if_header_not_matches:
+            - header: Location
+              # We are fine if it isn't empty
+              regexp: "^.+$"
+      http_2xx_content_ok:
+        prober: http
+        timeout: 8s
+        http:
+          method: GET
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          no_follow_redirects: false
+          preferred_ip_protocol: "ip4"
+          tls_config:
+            insecure_skip_verify: true
+          fail_if_body_not_matches_regexp:
+            - "OK"
+  serviceMonitor:
+    ## If true, a ServiceMonitor CRD is created for a prometheus operator
+    ## https://github.com/coreos/prometheus-operator for blackbox-exporter itself
+    ##
+    selfMonitor:
+      enabled: true
+      additionalMetricsRelabels: {}
+      additionalRelabeling: []
+      labels: {}
+      interval: 30s
+      scrapeTimeout: 30s
+    ## If true, a ServiceMonitor CRD is created for a prometheus operator
+    ## https://github.com/coreos/prometheus-operator for each target
+    ##
+    enabled: true
+
+    # Default values that will be used for all ServiceMonitors created by `targets`
+    defaults:
+      additionalMetricsRelabels: {}
+      additionalRelabeling: []
+      labels: {}
+      interval: 30s
+      scrapeTimeout: 30s
+      module: http_2xx
+    ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
+    scheme: http
+    ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+    ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+    tlsConfig: {}
+    bearerTokenFile:
+
+    targets:
+      #    - name: example                    # Human readable URL that will appear in Prometheus / AlertManager
+      #      url: http://example.com/healthz  # The URL that blackbox will scrape
+      #      hostname: example.com            # HTTP probes can accept an additional `hostname` parameter that will set `Host` header and TLS SNI
+      #      labels: {}                       # Map of labels for ServiceMonitor. Overrides value set in `defaults`
+      #      interval: 60s                    # Scraping interval. Overrides value set in `defaults`
+      #      scrapeTimeout: 60s               # Scrape timeout. Overrides value set in `defaults`
+      #      module: http_2xx                 # Module used for scraping. Overrides value set in `defaults`
+      #      additionalMetricsRelabels: {}    # Map of metric labels and values to add
+      #      additionalRelabeling: []         # List of metric relabeling actions to run
+
+      - name: loki.your.doma.in
+        url: https://loki.your.doma.in/
+        module: http_2xx
+        additionalMetricsRelabels:
+          customer: "CLOPS"
+
+  ## Custom PrometheusRules to be defined
+  ## ref: https://github.com/coreos/prometheus-operator#customresourcedefinitions
+  prometheusRule:
+    enabled: true
+    additionalLabels:
+      prometheus: k8s
+      role: alert-rules
+    namespace: ""
+    rules:
+      - alert: EndpointDown
+        expr: probe_success == 0
+        # If a service is down for 45 seconds and more something **might** be wrong or just a short blip,
+        # so let's cause a warning first for "documentation purposes".
+        for: 45s
+        labels:
+          severity: "warning"
+        annotations:
+          # https://github.com/helm/helm/issues/2798#issuecomment-467319526
+          summary: "Endpoint {{`{{ $labels.instance }}`}} down (45s)"
+      - alert: EndpointDown
+        expr: probe_success == 0
+        # If a service is down for more 2-3+ minutes something is definitely wrong
+        # either the service is down / broken, blackbox exporter has some issues,
+        # the K8S clusters internet access has issues or some other problem (probably
+        # network related issue).
+        for: 180s
+        labels:
+          severity: "critical"
+        annotations:
+          summary: "Endpoint {{`{{ $labels.instance }}`}} down (3 minutes)"
+      - alert: CertificateExpiry
+        # 14 Tage Warnung
+        expr: (probe_ssl_earliest_cert_expiry - (604800 * 2)) <= time()
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "Certificate {{`{{ $labels.instance }}`}} expires in less than 14 days."
+      - alert: CertificateExpiry
+        # 7 Tage Warnung
+        expr: (probe_ssl_earliest_cert_expiry - 604800) <= time()
+        labels:
+          severity: "critical"
+        annotations:
+          summary: "Certificate {{`{{ $labels.instance }}`}} expires in less than 7 days."
+  ## dnsPolicy and dnsConfig for Deployments and Daemonsets if you want non-default settings.
+  ## These will be passed directly to the PodSpec of same.
+  dnsPolicy: "None"
+  dnsConfig:
+    nameservers:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 9.9.9.9
+    searches: []
+    options: []
