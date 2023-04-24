@@ -5,14 +5,14 @@
 # Metrics-Server Config
 metrics-server:
   enabled: true
-  # -- Number of replicas
+  # -- Number of metrics-server replicas
   replicas: 2
   defaultArgs:
     - --cert-dir=/tmp
     - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
     - --kubelet-use-node-status-port
     - --metric-resolution=15s
-    # !!! Needed because the kubelets of CGRD don't seem to have a valid Cert with the IP in it.
+    # Needed. See this issue: https://github.com/kubernetes-sigs/metrics-server/issues/1221
     - --kubelet-insecure-tls
   affinity:
     podAntiAffinity:
@@ -24,6 +24,152 @@ metrics-server:
             values:
             - metrics-server
         topologyKey: kubernetes.io/hostname
+
+# Kube-Prometheus-Stack Config
+kube-prometheus-stack:
+  enabled: true
+  # Disable grafana, so we can deploy it by our conditions
+  grafana:
+    enabled: false
+  # Create default rules for monitoring the cluster
+  defaultRules:
+    # Labels for default rules
+    labels:
+      role: alert-rules
+  # Alertmanager Config
+  alertmanager:
+    # -- Enable PDB for the alertmanager
+    podDisruptionBudget:
+      enabled: true
+    # Alertmanager ingress configuration
+    ingress:
+      # -- Specifies whether an ingress should be created
+      enabled: true
+      # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
+      ingressClassName: nginx
+      # -- Annotations for the ingress
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        kubernetes.io/tls-acme: "true"
+      # -- Hosts configuration for the ingress
+      hosts:
+      - alertmanager.your-doma.in
+      # -- TLS configuration for the ingress
+      tls:
+      - secretName: alertmanager-general-tls
+        hosts:
+          - alertmanager.your-doma.in
+    alertmanagerSpec:
+      # -- Number of alertmanager replicas
+      replicas: 2
+      # -- The external URL the Alertmanager instances will be available under
+      externalUrl: https://monitoring.your-doma.in
+      # -- TODO: OAUTH
+      containers: []
+  # KubeControllerManager Config
+  kubeControllerManager:
+    service:
+      # -- define port
+      port: 10257
+      targetPort: 10257
+      selector:
+        component: kube-controller-manager
+        tier: control-plane
+    # KubeControllerManager service monitor configuration
+    serviceMonitor:
+      https: true
+      insecureSkipVerify: true
+  # KubeScheduler Config
+  kubeScheduler:
+    service:
+      # -- define port
+      port: 10259
+      targetPort: 10259
+    # KubeScheduler service monitor configuration
+    serviceMonitor:
+      https: true
+      insecureSkipVerify: true
+  # KubeProxy Config
+  kubeProxy:
+    # -- Specifies whether the kubeProxy scraping should be enabled
+    enabled: false
+  # Prometheus-Node-Exporter Config
+  prometheus-node-exporter:
+    extraArgs:
+      - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
+      - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
+      - --collector.textfile
+      - --collector.textfile.directory=/var/lib/node_exporter
+    extraHostVolumeMounts:
+      - name: var-lib-node-exporter
+        hostPath: /var/lib/node_exporter
+        mountPath: /var/lib/node_exporter
+        readOnly: true
+  # PrometheusOperator Config
+  prometheusOperator:
+    admissionWebhooks:
+      # -- Define failure policy
+      failurePolicy: Fail
+  # Prometheus Config
+  prometheus:
+    service:
+      # targetPort: 4180 # used for OauthProxContainer (Keycloak)
+      targetPort: 9090
+      # -- Additional port to define in the Service
+      additionalPorts:
+        - name: prometheus
+          port: 9191
+          protocol: TCP
+          targetPort: 9090
+    # -- Enable PDB for prometheus
+    podDisruptionBudget:
+      enabled: true
+    extraSecret:
+      ## if not set, name will be auto generated
+      name: "prometheus-basic-auth"
+      data:
+        # -- generated with htpasswd (PLEASE CHANGE!)
+        auth: "prometheus-admin:$apr1$7qIAixeo$Rm5t1a9RQ3nWFMYCc..uW.2DfjzYZY/"
+    # Prometheus ingress configuration
+    ingress:
+      # -- Specifies whether an ingress should be created
+      enabled: true
+      # -- Ingress Class Name. MAY be required for Kubernetes versions >= 1.18
+      ingressClassName: nginx
+      # -- Annotations for the ingress
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        kubernetes.io/tls-acme: "true"
+      # -- Hosts configuration for the ingress
+      hosts:
+      - prometheus.your-doma.in
+      # -- TLS configuration for the ingress
+      tls:
+      - secretName: prometheus-general-tls
+        hosts:
+          - prometheus.your-doma.in
+    prometheusSpec:
+      # -- enable --web.enable-remote-write-receiver flag on prometheus-server
+      enableRemoteWriteReceiver: true
+      # -- The external URL prometheus will be available under
+      externalUrl: "https://prometheus.your-doma.in"
+      ruleSelectorNilUsesHelmValues: false
+      # -- PrometheusRules to be selected for target discovery
+      ruleSelector:
+        matchLabels:
+          role: alert-rules
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+      # -- How long to retain metrics
+      retention: 7d
+      ## Enable compression of the write-ahead log using Snappy
+      walCompression: false
+      # -- Number of prometheus replicas
+      replicas: 2
+      # Resource limits & requests
+      resources:
+        requests:
+          memory: 400Mi
 
 # Grafana Config
 grafana:
@@ -48,14 +194,15 @@ grafana:
       kubernetes.io/tls-acme: "true"
     # -- Hosts configuration for the ingress
     hosts:
-      - "grafana.your.doma.in"
+      - grafana.your-doma.in
     # -- TLS configuration for the ingress
     tls:
     - hosts:
-      - "grafana.your.doma.in"
+      - grafana.your-doma.in
       secretName: grafana-ingress-tls
   # Storage configuration
   persistence:
+    # -- Specifies whether the storage should be enabled
     enabled: false
     storageClassName: rook-ceph-block
     size: 15Gi
@@ -89,7 +236,7 @@ loki:
       type: s3
       s3:
         s3: null
-        endpoint: "https://loki.your.doma.in"
+        endpoint: "https://loki.your-doma.in"
         region: "region-1"
         accessKeyId: "clops-test-key"
         secretAccessKey: "SUPERSECRETKEY"
@@ -120,10 +267,10 @@ loki:
       ingressClassName: nginx
       # -- Annotations for the gateway ingress
       annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-live-cloudicalnet
+        cert-manager.io/cluster-issuer: letsencrypt-prod
       # -- Hosts configuration for the gateway ingress
       hosts:
-        - host: loki.your.doma.in
+        - host: loki.your-doma.in
           paths:
             - path: /
               # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
@@ -132,7 +279,7 @@ loki:
       tls:
         - secretName: loki-gateway-tls
           hosts:
-            - loki.your.doma.in
+            - loki.your-doma.in
     # Basic auth configuration
     basicAuth:
       # -- Enables basic authentication for the gateway
