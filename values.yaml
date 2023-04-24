@@ -53,17 +53,17 @@ kube-prometheus-stack:
         kubernetes.io/tls-acme: "true"
       # -- Hosts configuration for the ingress
       hosts:
-      - alertmanager.your-doma.in
+        - alertmanager.your.doma.in
       # -- TLS configuration for the ingress
       tls:
-      - secretName: alertmanager-general-tls
-        hosts:
-          - alertmanager.your-doma.in
+        - secretName: alertmanager-general-tls
+          hosts:
+            - alertmanager.your.doma.in
     alertmanagerSpec:
       # -- Number of alertmanager replicas
       replicas: 2
       # -- The external URL the Alertmanager instances will be available under
-      externalUrl: https://monitoring.your-doma.in
+      externalUrl: https://alertmanager.your.doma.in
       # -- TODO: OAUTH
       containers: []
   # KubeControllerManager Config
@@ -107,9 +107,14 @@ kube-prometheus-stack:
         readOnly: true
   # PrometheusOperator Config
   prometheusOperator:
+    tlsProxy:
+      enabled: false
     admissionWebhooks:
+      enabled: false
       # -- Define failure policy
-      failurePolicy: Fail
+      failurePolicy: Ignore
+      patch:
+        enabled: false
   # Prometheus Config
   prometheus:
     service:
@@ -142,17 +147,17 @@ kube-prometheus-stack:
         kubernetes.io/tls-acme: "true"
       # -- Hosts configuration for the ingress
       hosts:
-      - prometheus.your-doma.in
+        - prometheus.your.doma.in
       # -- TLS configuration for the ingress
       tls:
-      - secretName: prometheus-general-tls
-        hosts:
-          - prometheus.your-doma.in
+        - secretName: prometheus-general-tls
+          hosts:
+            - prometheus.your.doma.in
     prometheusSpec:
       # -- enable --web.enable-remote-write-receiver flag on prometheus-server
       enableRemoteWriteReceiver: true
       # -- The external URL prometheus will be available under
-      externalUrl: "https://prometheus.your-doma.in"
+      externalUrl: "https://prometheus.your.doma.in"
       ruleSelectorNilUsesHelmValues: false
       # -- PrometheusRules to be selected for target discovery
       ruleSelector:
@@ -194,12 +199,12 @@ grafana:
       kubernetes.io/tls-acme: "true"
     # -- Hosts configuration for the ingress
     hosts:
-      - grafana.your-doma.in
+      - grafana.your.doma.in
     # -- TLS configuration for the ingress
     tls:
-    - hosts:
-      - grafana.your-doma.in
-      secretName: grafana-ingress-tls
+      - hosts:
+          - grafana.your.doma.in
+        secretName: grafana-ingress-tls
   # Storage configuration
   persistence:
     # -- Specifies whether the storage should be enabled
@@ -219,7 +224,7 @@ grafana:
         - name: Loki
           type: loki
           # "monitoring" should be the namespace of loki
-          url: "http://loki.monitoring.svc:3100"
+          url: "http://loki-gateway.NAMESPACE.monitoring.svc:3100"
           isDefault: false
 
 # Loki Config
@@ -270,7 +275,7 @@ loki:
         cert-manager.io/cluster-issuer: letsencrypt-prod
       # -- Hosts configuration for the gateway ingress
       hosts:
-        - host: loki.your-doma.in
+        - host: loki.your.doma.in
           paths:
             - path: /
               # -- pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
@@ -279,7 +284,7 @@ loki:
       tls:
         - secretName: loki-gateway-tls
           hosts:
-            - loki.your-doma.in
+            - loki.your.doma.in
     # Basic auth configuration
     basicAuth:
       # -- Enables basic authentication for the gateway
@@ -292,7 +297,7 @@ loki:
 # Prometheus Blackbox Exporter Config
 prometheus-blackbox-exporter:
   # -- enables or disable whole component
-  enabled: true
+  enabled: false
 
   # if the configuration is managed as secret outside the chart, using SealedSecret for example,
   # provide the name of the secret here. If secretConfig is set to true, configExistingSecretName will be ignored
@@ -397,7 +402,7 @@ prometheus-blackbox-exporter:
       #      additionalRelabeling: []         # List of metric relabeling actions to run
 
       - name: loki.your.doma.in
-        url: https://loki.your.doma.in/
+        url: https://loki.your.doma.in
         module: http_2xx
         additionalMetricsRelabels:
           customer: "CLOPS"
