@@ -279,6 +279,91 @@ grafana:
         gnetId: 13659
         revision: 1
         datasource: Prometheus
+    kubernetes:
+      # local-dashboard:
+      #   url: https://example.com/repository/test.json
+      #   token: ""
+      alertmanager-overview.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/alertmanager-overview.yaml
+        token: ""
+      apiserver.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/apiserver.yaml
+        token: ""
+      cluster-total.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/cluster-total.yaml
+        token: ""
+      controller-manager.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/controller-manager.yaml
+        token: ""
+      etcd.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/etcd.yaml
+        token: ""
+      grafana-overview.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/grafana-overview.yaml
+        token: ""
+      k8s-coredns.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/k8s-coredns.yaml
+        token: ""
+      k8s-resources-cluster.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/k8s-resources-cluster.yaml
+        token: ""
+      k8s-resources-namespace.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/k8s-resources-namespace.yaml
+        token: ""
+      k8s-resources-node.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/k8s-resources-node.yaml
+        token: ""
+      k8s-resources-pod.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/k8s-resources-pod.yaml
+        token: ""
+      k8s-resources-workload.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/k8s-resources-workload.yaml
+        token: ""
+      k8s-resources-workloads-namespace.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/k8s-resources-workloads-namespace.yaml
+        token: ""
+      kubelet.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/kubelet.yaml
+        token: ""
+      namespace-by-pod.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/namespace-by-pod.yaml
+        token: ""
+      namespace-by-workload.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/namespace-by-workload.yaml
+        token: ""
+      node-cluster-rsrc-use.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/node-cluster-rsrc-use.yaml
+        token: ""
+      node-rsrc-use.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/node-rsrc-use.yaml
+        token: ""
+      nodes-darwin.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/nodes-darwin.yaml
+        token: ""
+      nodes.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/nodes.yaml
+        token: ""
+      persistentvolumesusage.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/persistentvolumesusage.yaml
+        token: ""
+      pod-total.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/pod-total.yaml
+        token: ""
+      prometheus-remote-write.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/prometheus-remote-write.yaml
+        token: ""
+      prometheus.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/prometheus.yaml
+        token: ""
+      proxy.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/proxy.yaml
+        token: ""
+      scheduler.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/scheduler.yaml
+        token: ""
+      workload-total.yaml:
+        url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/templates/grafana/dashboards-1.14/workload-total.yaml
+        token: ""
 
 # Loki Config
 loki:
