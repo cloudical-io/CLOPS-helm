@@ -227,12 +227,12 @@ grafana:
         - name: Prometheus
           type: prometheus
           # "monitoring" should be the namespace of prometheus
-          url: "http://prometheus-stack-prometheus.clops-test.svc:9090"
+          url: "http://prometheus-stack-prometheus.monitoring.svc:9090"
           isDefault: true
         - name: Loki
           type: loki
           # "monitoring" should be the namespace of loki
-          url: "http://loki-gateway.clops-test.svc:80"
+          url: "http://loki-gateway.monitoring.svc:80"
           isDefault: false
           basicAuth: true
           basicAuthUser: testloki
@@ -370,7 +370,7 @@ promtail:
     # -- The config of clients of the Promtail server
     clients:
       # "monitoring" should be the namespace of loki
-      - url: http://loki-gateway.clops-test.svc/loki/api/v1/push
+      - url: http://loki-gateway.monitoring.svc/loki/api/v1/push
     file: |
       server:
         log_level: {{ .Values.config.logLevel }}
