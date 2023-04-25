@@ -2,36 +2,10 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Metrics-Server Config
-metrics-server:
-  # -- Enable the whole component
-  enabled: false
-  # -- Override the full names of all resources
-  fullnameOverride: metrics-server
-  # -- Number of metrics-server replicas
-  replicas: 2
-  defaultArgs:
-    - --cert-dir=/tmp
-    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-    - --kubelet-use-node-status-port
-    - --metric-resolution=15s
-    # Needed. See this issue: https://github.com/kubernetes-sigs/metrics-server/issues/1221
-    - --kubelet-insecure-tls
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                  - metrics-server
-          topologyKey: kubernetes.io/hostname
-
 # Kube-Prometheus-Stack Config
 kube-prometheus-stack:
   # -- Enable the whole component
-  enabled: false
+  enabled: true
   # -- Override the full names of all resources
   fullnameOverride: prometheus-stack
   # Disable grafana, so we can deploy it by our conditions
@@ -99,8 +73,14 @@ kube-prometheus-stack:
   kubeProxy:
     # -- Specifies whether the kubeProxy scraping should be enabled
     enabled: false
+  # Kube-state-metrics Config
+  kube-state-metrics:
+    # -- Override the full names of all resources
+    fullnameOverride: prometheus-kube-state-metrics
   # Prometheus-Node-Exporter Config
   prometheus-node-exporter:
+    # -- Override the full names of all resources
+    fullnameOverride: prometheus-node-exporter
     extraArgs:
       - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
       - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
@@ -184,14 +164,45 @@ kube-prometheus-stack:
         requests:
           memory: 400Mi
 
+# Metrics-Server Config
+metrics-server:
+  # -- Enable the whole component
+  enabled: true
+  # -- Override the full names of all resources
+  fullnameOverride: metrics-server
+  # -- Number of metrics-server replicas
+  replicas: 2
+  # ServiceMonitor configuration
+  serviceMonitor:
+    enabled: false
+  defaultArgs:
+    - --cert-dir=/tmp
+    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+    - --kubelet-use-node-status-port
+    - --metric-resolution=15s
+    # Needed. See this issue: https://github.com/kubernetes-sigs/metrics-server/issues/1221
+    - --kubelet-insecure-tls
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - metrics-server
+          topologyKey: kubernetes.io/hostname
+
 # Grafana Config
 grafana:
   # -- Enable the whole component
-  enabled: false
+  enabled: true
+  # -- Override the full names of all resources
+  fullnameOverride: grafana
   # Default grafana login credentials
   adminUser: grafanaAdmin
   adminPassword: superSecretPassword
-  # Grafana service monitor
+  # ServiceMonitor configuration
   serviceMonitor:
     enabled: true
   # Grafana ingress configuration
@@ -254,20 +265,16 @@ grafana:
           editable: true
           options:
             path: /var/lib/grafana/dashboards/default
-        - name: "loki"
+        - name: "clops"
           orgId: 1
-          folder: "Storage"
+          folder: "Clops"
           type: file
           disableDeletion: false
           editable: true
           options:
-            path: /var/lib/grafana/dashboards/loki
+            path: /var/lib/grafana/dashboards/clops
   dashboards:
     default:
-      loki-log-dashboard:
-        gnetId: 13186
-        revision: 1
-        datasource: Loki
       blackbox-exporter:
         gnetId: 13659
         revision: 1
@@ -342,11 +349,14 @@ loki:
       username: testloki
       # -- The basic auth password for the gateway
       password: testlokipassword
+  grafana-agent-operator:
+    # -- Override the full names of all resources
+    fullnameOverride: loki-grafana-agent-operator
 
 # Promtail Config
 promtail:
   # -- Enable the whole component
-  enabled: false
+  enabled: true
   # -- Override the full names of all resources
   fullnameOverride: promtail
   # -- Resource requests and limits
@@ -404,8 +414,9 @@ promtail:
 # Prometheus Blackbox Exporter Config
 prometheus-blackbox-exporter:
   # -- Enable the whole component
-  enabled: false
-
+  enabled: true
+  # -- Override the full names of all resources
+  fullnameOverride: prometheus-blackbox-exporter
   # if the configuration is managed as secret outside the chart, using SealedSecret for example,
   # provide the name of the secret here. If secretConfig is set to true, configExistingSecretName will be ignored
   # in favor of the config value.
@@ -466,6 +477,7 @@ prometheus-blackbox-exporter:
             insecure_skip_verify: true
           fail_if_body_not_matches_regexp:
             - "OK"
+  # ServiceMonitor configuration
   serviceMonitor:
     ## If true, a ServiceMonitor CRD is created for a prometheus operator
     ## https://github.com/coreos/prometheus-operator for blackbox-exporter itself
