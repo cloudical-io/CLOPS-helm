@@ -44,7 +44,12 @@ dependencies:
     repository: "https://grafana.github.io/helm-charts"
     condition: loki.enabled
 
+  - name: promtail
+    version: "6.11.*"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: promtail.enabled
+
   - name: prometheus-blackbox-exporter
-    version: 7.7.0
+    version: "7.7.*"
     repository: https://prometheus-community.github.io/helm-charts
     condition: prometheus-blackbox-exporter.enabled

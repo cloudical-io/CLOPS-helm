@@ -4,6 +4,7 @@
 
 # Metrics-Server Config
 metrics-server:
+  # -- Enable the whole component
   enabled: true
   # -- Number of metrics-server replicas
   replicas: 2
@@ -27,7 +28,10 @@ metrics-server:
 
 # Kube-Prometheus-Stack Config
 kube-prometheus-stack:
+  # -- Enable the whole component
   enabled: true
+  # -- Override the full names of all resources
+  fullnameOverride: prometheus-stack
   # Disable grafana, so we can deploy it by our conditions
   grafana:
     enabled: false
@@ -107,6 +111,8 @@ kube-prometheus-stack:
         readOnly: true
   # PrometheusOperator Config
   prometheusOperator:
+    tls:
+      enabled: false
     tlsProxy:
       enabled: false
     admissionWebhooks:
@@ -178,14 +184,14 @@ kube-prometheus-stack:
 
 # Grafana Config
 grafana:
+  # -- Enable the whole component
   enabled: true
   # Default grafana login credentials
   adminUser: grafanaAdmin
   adminPassword: superSecretPassword
   # Grafana service monitor
   serviceMonitor:
-    enabled: false
-    namespace: clops-monitoring
+    enabled: true
   # Grafana ingress configuration
   ingress:
     # -- Specifies whether an ingress should be created
@@ -219,16 +225,25 @@ grafana:
         - name: Prometheus
           type: prometheus
           # "monitoring" should be the namespace of prometheus
-          url: "http://prometheus-prometheus.monitoring.svc:9090"
+          url: "http://prometheus-stack-prometheus.monitoring.svc:9090"
           isDefault: true
         - name: Loki
           type: loki
           # "monitoring" should be the namespace of loki
-          url: "http://loki-gateway.NAMESPACE.monitoring.svc:3100"
+          url: "http://loki-gateway.monitoring.svc:80"
           isDefault: false
+          basicAuth: true
+          basicAuthUser: testloki
+          jsonData:
+            httpHeaderName1: X-Scope-OrgID
+          secureJsonData:
+            basicAuthPassword: testlokipassword
+            httpHeaderValue1: "1"
+          withCredentials: true
 
 # Loki Config
 loki:
+  # -- Enable the whole component
   enabled: true
   # Loki Configuration
   loki:
@@ -294,9 +309,67 @@ loki:
       # -- The basic auth password for the gateway
       password: testlokipassword
 
+# Promtail Config
+promtail:
+  # -- Enable the whole component
+  enabled: true
+  # -- Override the full names of all resources
+  fullnameOverride: promtail
+  # -- Resource requests and limits
+  resources:
+    limits:
+      cpu: 200m
+      memory: 375Mi
+    requests:
+      cpu: 100m
+      memory: 135Mi
+  # Extra args for the Promtail container.
+  extraArgs:
+    - -client.external-labels=hostname=$(HOSTNAME)
+  # ServiceMonitor configuration
+  serviceMonitor:
+    enabled: true
+  # Promtail config file options
+  config:
+    # -- The log level of the Promtail server
+    logLevel: warn
+    # -- The config of clients of the Promtail server
+    clients:
+      # "monitoring" should be the namespace of loki
+      - url: http://loki-gateway.clops-test.svc/loki/api/v1/push
+    file: |
+      server:
+        log_level: {{ .Values.config.logLevel }}
+        http_listen_port: {{ .Values.config.serverPort }}
+        {{- with .Values.httpPathPrefix }}
+        http_path_prefix: {{ . }}
+        {{- end }}
+        {{- tpl .Values.config.snippets.extraServerConfigs . | nindent 2 }}
+
+      clients:
+        ## CARE FOR INDENTATION
+        {{- tpl (toYaml .Values.config.clients) . | nindent 2 }}
+          tenant_id: 1
+          basic_auth:
+              username: 'testloki'
+              password: 'testlokipassword'
+
+      positions:
+        filename: /run/promtail/positions.yaml
+
+      scrape_configs:
+        {{- tpl .Values.config.snippets.scrapeConfigs . | nindent 2 }}
+        {{- tpl .Values.config.snippets.extraScrapeConfigs . | nindent 2 }}
+
+      limits_config:
+        {{- tpl .Values.config.snippets.extraLimitsConfig . | nindent 2 }}
+
+      tracing:
+        enabled: {{ .Values.config.enableTracing }}
+
 # Prometheus Blackbox Exporter Config
 prometheus-blackbox-exporter:
-  # -- enables or disable whole component
+  # -- Enable the whole component
   enabled: false
 
   # if the configuration is managed as secret outside the chart, using SealedSecret for example,
