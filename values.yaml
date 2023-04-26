@@ -24,6 +24,12 @@ kube-prometheus-stack:
     podDisruptionBudget:
       enabled: true
     # Alertmanager ingress configuration
+    extraSecret:
+      # -- If not set, name will be auto generated
+      name: "alertmanager-basic-auth"
+      data:
+        # -- generated with htpasswd (PLEASE CHANGE!)
+        auth: "alertadmin:$apr1$LN5vrqsG$SUjL9IbnRsUOTjUlrP2LL/" # alertadmin:alertpw
     ingress:
       # -- Specifies whether an ingress should be created
       enabled: true
@@ -33,6 +39,10 @@ kube-prometheus-stack:
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-prod
         kubernetes.io/tls-acme: "true"
+        # -- Enable Basic Auth
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: alertmanager-basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
       # -- Hosts configuration for the ingress
       hosts:
         - "alertmanager.{{ .Values.global.domain }}"
@@ -119,12 +129,13 @@ kube-prometheus-stack:
     # -- Enable PDB for prometheus
     podDisruptionBudget:
       enabled: true
+    # -- Set Basic Auth Secret
     extraSecret:
-      ## if not set, name will be auto generated
+      # -- If not set, name will be auto generated
       name: "prometheus-basic-auth"
       data:
         # -- generated with htpasswd (PLEASE CHANGE!)
-        auth: "prometheus-admin:$apr1$7qIAixeo$Rm5t1a9RQ3nWFMYCc..uW.2DfjzYZY/"
+        auth: "promadmin:$apr1$e8kSmViA$It4clhTmgAybWtl47J9Ud." # promadmin:prompw
     # Prometheus ingress configuration
     ingress:
       # -- Specifies whether an ingress should be created
@@ -135,6 +146,10 @@ kube-prometheus-stack:
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-prod
         kubernetes.io/tls-acme: "true"
+        # -- Enable Basic Auth
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
       # -- Hosts configuration for the ingress
       hosts:
         - "prometheus.{{ .Values.global.domain }}"
@@ -220,11 +235,11 @@ grafana:
       kubernetes.io/tls-acme: "true"
     # -- Hosts configuration for the ingress
     hosts:
-      - grafana.your.doma.in
+      - grafana.1.clops.cloudical.in
     # -- TLS configuration for the ingress
     tls:
       - hosts:
-          - grafana.your.doma.in
+          - grafana.1.clops.cloudical.in
         secretName: grafana-ingress-tls
   # Storage configuration
   persistence:
