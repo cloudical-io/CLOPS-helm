@@ -1,6 +1,8 @@
 # Default values for CLOPS-helm.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+global:
+  domain: your.doma.in
 
 # Kube-Prometheus-Stack Config
 kube-prometheus-stack:
@@ -33,17 +35,17 @@ kube-prometheus-stack:
         kubernetes.io/tls-acme: "true"
       # -- Hosts configuration for the ingress
       hosts:
-        - alertmanager.your.doma.in
+        - "alertmanager.{{ .Values.global.domain }}"
       # -- TLS configuration for the ingress
       tls:
         - secretName: alertmanager-general-tls
           hosts:
-            - alertmanager.your.doma.in
+            - "alertmanager.{{ .Values.global.domain }}"
     alertmanagerSpec:
       # -- Number of alertmanager replicas
       replicas: 2
       # -- The external URL the Alertmanager instances will be available under
-      externalUrl: https://alertmanager.your.doma.in
+      externalUrl: "https://alertmanager.{{ .Values.global.domain }}"
       # -- TODO: OAUTH
       containers: []
   # KubeControllerManager Config
@@ -135,17 +137,17 @@ kube-prometheus-stack:
         kubernetes.io/tls-acme: "true"
       # -- Hosts configuration for the ingress
       hosts:
-        - prometheus.your.doma.in
+        - "prometheus.{{ .Values.global.domain }}"
       # -- TLS configuration for the ingress
       tls:
         - secretName: prometheus-general-tls
           hosts:
-            - prometheus.your.doma.in
+            - "prometheus.{{ .Values.global.domain }}"
     prometheusSpec:
       # -- enable --web.enable-remote-write-receiver flag on prometheus-server
       enableRemoteWriteReceiver: true
       # -- The external URL prometheus will be available under
-      externalUrl: "https://prometheus.your.doma.in"
+      externalUrl: "https://prometheus.{{ .Values.global.domain }}"
       ruleSelectorNilUsesHelmValues: false
       # -- PrometheusRules to be selected for target discovery
       ruleSelector:
@@ -237,13 +239,11 @@ grafana:
       datasources:
         - name: Prometheus
           type: prometheus
-          # "monitoring" should be the namespace of prometheus
-          url: "http://prometheus-stack-prometheus.monitoring.svc:9090"
+          url: "http://prometheus-stack-prometheus.{{ .Release.Namespace }}.svc:9090"
           isDefault: true
         - name: Loki
           type: loki
-          # "monitoring" should be the namespace of loki
-          url: "http://loki-gateway.monitoring.svc:80"
+          url: "http://loki-gateway.{{ .Release.Namespace }}.svc:80"
           isDefault: false
           basicAuth: true
           basicAuthUser: testloki
@@ -281,14 +281,14 @@ grafana:
           editable: true
           options:
             path: /var/lib/grafana/dashboards/grafana
-        - name: "alertmanager"
+        - name: "alertmanager-dash"
           orgId: 1
-          folder: "Alertmanager"
+          folder: "Alertmanager-dash"
           type: file
           disableDeletion: false
           editable: true
           options:
-            path: /var/lib/grafana/dashboards/alertmanager
+            path: /var/lib/grafana/dashboards/alertmanager-dash
         - name: "prometheus"
           orgId: 1
           folder: "Prometheus"
@@ -304,7 +304,10 @@ grafana:
         revision: 1
         datasource: Prometheus
     grafana:
-    alertmanager:
+    alertmanager-dash:
+      alertmanager-overview:
+        gnetId: 9578
+        revision: 1
     kubernetes:
       k8s-system-api-server:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
@@ -424,8 +427,7 @@ promtail:
     logLevel: warn
     # -- The config of clients of the Promtail server
     clients:
-      # "monitoring" should be the namespace of loki
-      - url: http://loki-gateway.monitoring.svc/loki/api/v1/push
+      - url: "http://loki-gateway.{{ .Release.Namespace }}.svc/loki/api/v1/push"
     file: |
       server:
         log_level: {{ .Values.config.logLevel }}
