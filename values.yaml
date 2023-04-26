@@ -473,7 +473,7 @@ grafana:
             },
             "timepicker": {},
             "timezone": "",
-            "title": "Node Overview 1",
+            "title": "Node Overview",
             "version": 4,
             "weekStart": ""
           }
