@@ -105,14 +105,18 @@ kube-prometheus-stack:
         readOnly: true
   # PrometheusOperator Config
   prometheusOperator:
+    # -- TLS configuration (do not change: https://github.com/helm/charts/issues/21080#issuecomment-596958610)
     tls:
       enabled: false
+    # -- TLS proxy configuration (do not change: https://github.com/helm/charts/issues/21080#issuecomment-596958610)
     tlsProxy:
       enabled: false
+    # -- Admission webhooks configuration (do not change: https://github.com/helm/charts/issues/21080#issuecomment-596958610)
     admissionWebhooks:
       enabled: false
       # -- Define failure policy
       failurePolicy: Ignore
+      # -- (do not change: https://github.com/helm/charts/issues/21080#issuecomment-596958610)
       patch:
         enabled: false
   # Prometheus Config
