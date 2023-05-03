@@ -283,31 +283,7 @@ grafana:
           disableDeletion: false
           editable: true
           options:
-            path: /var/lib/grafana/dashboards/default
-        - name: "kubernetes"
-          orgId: 1
-          folder: "Kubernetes"
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/kubernetes
-        - name: "grafana"
-          orgId: 1
-          folder: "Grafana"
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/grafana
-        - name: "alertmanager-dash"
-          orgId: 1
-          folder: "Alertmanager-dash"
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/alertmanager-dash
+            path: /var/lib/grafana/dashboards/default        
         - name: "prometheus"
           orgId: 1
           folder: "Prometheus"
@@ -316,17 +292,21 @@ grafana:
           editable: true
           options:
             path: /var/lib/grafana/dashboards/prometheus
+        - name: "kubernetes"
+          orgId: 1
+          folder: "Kubernetes"
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/kubernetes
   dashboards:
+    default: {} # add custom dashboards once they are public
     prometheus:
       blackbox-exporter:
         gnetId: 13659
         revision: 1
         datasource: Prometheus
-    grafana:
-    alertmanager-dash:
-      alertmanager-overview:
-        gnetId: 9578
-        revision: 1
     kubernetes:
       k8s-system-api-server:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
@@ -346,141 +326,6 @@ grafana:
       k8s-views-pods:
         url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
         token: ""
-    default:
-      NodeOverview:
-        json: |
-          {
-            "annotations": {
-              "list": [
-                {
-                  "builtIn": 1,
-                  "datasource": {
-                    "type": "grafana",
-                    "uid": "-- Grafana --"
-                  },
-                  "enable": true,
-                  "hide": true,
-                  "iconColor": "rgba(0, 211, 255, 1)",
-                  "name": "Annotations & Alerts",
-                  "target": {
-                    "limit": 100,
-                    "matchAny": false,
-                    "tags": [],
-                    "type": "dashboard"
-                  },
-                  "type": "dashboard"
-                }
-              ]
-            },
-            "editable": true,
-            "fiscalYearStartMonth": 0,
-            "graphTooltip": 0,
-            "id": 40,
-            "links": [],
-            "liveNow": false,
-            "panels": [
-              {
-                "datasource": {
-                  "type": "Prometheus",
-                  "uid": "${ds}"
-                },
-                "fieldConfig": {
-                  "defaults": {
-                    "mappings": [],
-                    "max": 1,
-                    "min": 0,
-                    "thresholds": {
-                      "mode": "absolute",
-                      "steps": [
-                        {
-                          "color": "red"
-                        },
-                        {
-                          "color": "green",
-                          "value": 1
-                        }
-                      ]
-                    },
-                    "unit": "short"
-                  },
-                  "overrides": []
-                },
-                "gridPos": {
-                  "h": 9,
-                  "w": 12,
-                  "x": 0,
-                  "y": 0
-                },
-                "id": 2,
-                "options": {
-                  "colorMode": "background",
-                  "graphMode": "none",
-                  "justifyMode": "auto",
-                  "orientation": "auto",
-                  "reduceOptions": {
-                    "calcs": [
-                      "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                  },
-                  "textMode": "name"
-                },
-                "pluginVersion": "9.4.7",
-                "targets": [
-                  {
-                    "datasource": {
-                      "type": "prometheus",
-                      "uid": "${ds}"
-                    },
-                    "editorMode": "code",
-                    "expr": "max by(node)(up{job=\"kubelet\"})",
-                    "legendFormat": "__auto",
-                    "range": true,
-                    "refId": "A"
-                  }
-                ],
-                "title": "Panel Title",
-                "type": "stat"
-              }
-            ],
-            "refresh": "",
-            "revision": 1,
-            "schemaVersion": 38,
-            "style": "dark",
-            "tags": [],
-            "templating": {
-              "list": [
-                {
-                  "current": {
-                    "selected": false,
-                    "text": "Prometheus",
-                    "value": "Prometheus"
-                  },
-                  "hide": 0,
-                  "includeAll": false,
-                  "multi": false,
-                  "name": "ds",
-                  "options": [],
-                  "query": "prometheus",
-                  "queryValue": "",
-                  "refresh": 1,
-                  "regex": "",
-                  "skipUrlSync": false,
-                  "type": "datasource"
-                }
-              ]
-            },
-            "time": {
-              "from": "now-6h",
-              "to": "now"
-            },
-            "timepicker": {},
-            "timezone": "",
-            "title": "Node Overview",
-            "version": 4,
-            "weekStart": ""
-          }
 
 # Loki Config
 loki:
