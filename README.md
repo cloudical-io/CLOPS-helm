@@ -23,6 +23,7 @@ Add the helm repo, edit the values.yaml to your liking and install the chart:
 helm repo add clops https://harbor.cloudical.net/clops
 helm upgrade --install --namespace clops --create-namespace clopsmonitoring clops/clops -f values.yaml
 ```
+> :warning: At the moment you need to change the URL not only of **global.domain** but also of **grafana.ingress.hosts**, **grafana.ingress.tls**, **loki.gateway.ingress.hosts**, **loki.gateway.ingress.tls** and **loki.loki.storage.s3.endpoint** !
 
 ## Variables
 | Parameter | Description | Default |
