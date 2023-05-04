@@ -35,7 +35,7 @@ helm upgrade --install --namespace clops --create-namespace clopsmonitoring clop
 | kube-prometheus-stack.grafana.enabled | Enable Grafana inside Kube-Prometheus-Stack | False |
 | kube-prometheus-stack.alertmanager.podDisruptionBudget.enabled | Enable PodDistributionBudget. For details see [here](https://kubernetes.io/docs/tasks/run-application/configure-pdb/). | True |
 | kube-prometheus-stack.alertmanager.extraSecret.name | Name for the basic auth secret (If not set, it will be auto generated) | alertmanager-basic-auth |
-| kube-prometheus-stack.alertmanager.extraSecret.data.auth | Basic auth username and password as bcrypt hashed string | alertadmin:\$apr1\$LN5vrqsG\$SUjL9IbnRsUOTjUlrP2LL/ |
+| kube-prometheus-stack.alertmanager.extraSecret.data.auth | Basic auth username and password as bcrypt hashed string | alertadmin:\$apr1\$LN5vrqsG\$SUjL9IbnRsUOTjUlrP2LL/ (alertadmin:alertpw) |
 | kube-prometheus-stack.alertmanager.ingress.enabled | Enable ingress | True |
 | kube-prometheus-stack.alertmanager.ingress.ingressClassName | Ingress class name (may be required for Kubernetes versions >= 1.18) | nginx |
 | kube-prometheus-stack.alertmanager.ingress.annotations | Ingress annotations | [cert-manager.io/cluster-issuer: letsencrypt-prod, kubernetes.io/tls-acme: "true", nginx.ingress.kubernetes.io/auth-type: basic, nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth, nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"] |
@@ -57,7 +57,7 @@ helm upgrade --install --namespace clops --create-namespace clopsmonitoring clop
 | kube-prometheus-stack.prometheus.service.targetPort | Prometheus service port | 9090 |
 | kube-prometheus-stack.prometheus.podDisruptionBudget.enabled | Enable PodDistributionBudget. For details see [here](https://kubernetes.io/docs/tasks/run-application/configure-pdb/). | True |
 | kube-prometheus-stack.prometheus.extraSecret.name | Name for the basic auth secret (If not set, it will be auto generated) | prometheus-basic-auth |
-| kube-prometheus-stack.prometheus.extraSecret.data.auth | Basic auth username and password as bcrypt hashed string | promadmin:\$apr1\$e8kSmViA\$It4clhTmgAybWtl47J9Ud. |
+| kube-prometheus-stack.prometheus.extraSecret.data.auth | Basic auth username and password as bcrypt hashed string | promadmin:\$apr1\$e8kSmViA\$It4clhTmgAybWtl47J9Ud. (promadmin:prompw) |
 | kube-prometheus-stack.prometheus.ingress.enabled | Enable ingress | True |
 | kube-prometheus-stack.prometheus.ingress.ingressClassName | Ingress class name (may be required for Kubernetes versions >= 1.18) | nginx |
 | kube-prometheus-stack.prometheus.ingress.annotations | Ingress annotations | [cert-manager.io/cluster-issuer: letsencrypt-prod, kubernetes.io/tls-acme: "true", nginx.ingress.kubernetes.io/auth-type: basic, nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth, nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"] |
