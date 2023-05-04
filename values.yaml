@@ -124,7 +124,7 @@ kube-prometheus-stack:
     service:
       # targetPort: 4180 # used for OauthProxContainer (Keycloak)
       targetPort: 9090
-      # -- Additional port to define in the Service
+      # -- Additional ports for the service
       additionalPorts:
         - name: prometheus
           port: 9191
@@ -239,17 +239,17 @@ grafana:
       kubernetes.io/tls-acme: "true"
     # -- Hosts configuration for the ingress
     hosts:
-      - grafana.1.clops.cloudical.in
+      - grafana.your.doma.in
     # -- TLS configuration for the ingress
     tls:
       - hosts:
-          - grafana.1.clops.cloudical.in
+          - grafana.your.doma.in
         secretName: grafana-ingress-tls
   # Storage configuration
   persistence:
     # -- Specifies whether the storage should be enabled
     enabled: false
-    storageClassName: rook-ceph-block
+    # storageClassName: default
     size: 15Gi
   # Data source configuration
   datasources:
@@ -338,9 +338,9 @@ loki:
     # -- Storage config. Providing this will automatically populate all necessary storage configs in the templated config.
     storage:
       bucketNames:
-        chunks: loki-test-clops-chunks
-        ruler: loki-test-clops-ruler
-        admin: loki-test-clops-admin
+        chunks: loki-clops-chunks
+        ruler: loki-clops-ruler
+        admin: loki-clops-admin
       type: s3
       s3:
         s3: null
@@ -526,6 +526,11 @@ prometheus-blackbox-exporter:
   # ServiceMonitor configuration
   serviceMonitor:
     ## If true, a ServiceMonitor CRD is created for a prometheus operator
+    ## https://github.com/coreos/prometheus-operator for each target
+    ##
+    enabled: true
+    
+    ## If true, a ServiceMonitor CRD is created for a prometheus operator
     ## https://github.com/coreos/prometheus-operator for blackbox-exporter itself
     ##
     selfMonitor:
@@ -535,10 +540,6 @@ prometheus-blackbox-exporter:
       labels: {}
       interval: 30s
       scrapeTimeout: 30s
-    ## If true, a ServiceMonitor CRD is created for a prometheus operator
-    ## https://github.com/coreos/prometheus-operator for each target
-    ##
-    enabled: true
 
     # Default values that will be used for all ServiceMonitors created by `targets`
     defaults:
