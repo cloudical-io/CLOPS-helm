@@ -27,9 +27,14 @@ helm upgrade --install --namespace clops --create-namespace clopsmonitoring clop
 ## Variables
 > :warning: At the moment you need to change the URL not only of **global.domain** but also of **grafana.ingress.hosts**, **grafana.ingress.tls**, **loki.gateway.ingress.hosts**, **loki.gateway.ingress.tls** and **loki.loki.storage.s3.endpoint** !
 
+### Global
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | global.domain | Your domain | your.doma.in |
+
+### Kube-Prometheus-Stack
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
 | kube-prometheus-stack.enabled | Enable Kube-Prometheus-Stack component | True |
 | kube-prometheus-stack.fullnameOverride | Override the deployment name | prometheus-stack |
 | kube-prometheus-stack.grafana.enabled | Enable Grafana inside Kube-Prometheus-Stack | False |
@@ -69,10 +74,18 @@ helm upgrade --install --namespace clops --create-namespace clopsmonitoring clop
 | kube-prometheus-stack.prometheus.prometheusSpec.walCompression | Enable compression of the write-ahead log using Snappy | False |
 | kube-prometheus-stack.prometheus.prometheusSpec.replicas | Number of replications | 2 |
 | kube-prometheus-stack.prometheus.prometheusSpec.resources.requests.memory | Memory resource request | 400Mi |
+
+### Metrics-Server
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
 | metrics-server.enabled | Enable Metrics-Server component | True |
 | metrics-server.fullnameOverride | Override the deployment name | metrics-server |
 | metrics-server.replicas | Number of replications | 2 |
 | metrics-server.serviceMonitor.enabled | Enable prometheus service monitor | False |
+
+### Grafana
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
 | grafana.enabled | Enable Grafana component | True |
 | grafana.fullnameOverride | Override the deployment name | grafana |
 | grafana.adminUser | Default admin username | grafanaAdmin |
@@ -89,6 +102,10 @@ helm upgrade --install --namespace clops --create-namespace clopsmonitoring clop
 | grafana.datasources | Default Grafana data sources | See values.yaml |
 | grafana.dashboardProviders | Default dashboard folders | See values.yaml |
 | grafana.dashboards | Dashboards integrated by default | See values.yaml |
+
+### Loki
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
 | loki.enabled | Enalbe Loki component | True |
 | loki.fullnameOverride | Override the deployment name | loki |
 | loki.loki.storage.bucketNames.chunks | 'chunks' S3 bucket name | loki-clops-chunks |
@@ -114,6 +131,10 @@ helm upgrade --install --namespace clops --create-namespace clopsmonitoring clop
 | loki.gateway.basicAuth.username | Default basic auth username | testloki |
 | loki.gateway.basicAuth.password | Default basic auth password | testlokipassword |
 | loki.grafana-agent-operator.fullnameOverride | Override the deployment name | loki-grafana-agent-operator |
+
+### Promtail
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
 | promtail.enabled | Enable Promtail component | True |
 | promtail.fullnameOverride | Override the deployment name | promtail |
 | promtail.resources.limits.cpu | CPU limit | 200m |
@@ -123,6 +144,10 @@ helm upgrade --install --namespace clops --create-namespace clopsmonitoring clop
 | promtail.serviceMonitor.enabled | Enable prometheus service monitor | True |
 | promtail.config.logLevel | Promtail server log level | warn |
 | promtail.config.clients | Promtail server clients | [{'url': 'http://loki-gateway.{{ .Release.Namespace }}.svc/loki/api/v1/push'}] |
+
+### Prometheus-Blackbox-Exporter
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
 | prometheus-blackbox-exporter.enabled | Enable Prometheues-Blackbox-Exporter component | True |
 | prometheus-blackbox-exporter.fullnameOverride | Override the deployment name | prometheus-blackbox-exporter |
 | prometheus-blackbox-exporter.configExistingSecretName | Name of an existing secret | "" |
