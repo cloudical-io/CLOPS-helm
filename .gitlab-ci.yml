@@ -1,12 +1,23 @@
 image: docker.io/alpine/k8s:1.26.3
 
 stages:
+  - prepare
   - test
   - build
   - push
 
-template_test:
+build_dependency:
+  stage: prepare
+  cache:
+  <<: *global_cache
+  script:
+    - helm dependency build
+
+
+chart_scan:
   stage: test
+  cache:
+  <<: *global_cache
   script:
     - |
       pip3 install --upgrade pip && pip3 install --upgrade setuptools && \
@@ -14,8 +25,10 @@ template_test:
     - helm template clops -f values.yaml . > rendered.yaml
     - checkov -f rendered.yaml --framework kubernetes --no-guide
 
-chart_scan:
+template_test:
   stage: test
+  cache:
+  <<: *global_cache
   script:
     - helm template clops -f values.yaml .
 
@@ -39,3 +52,14 @@ push_chart:
   script:
     - helm plugin install https://github.com/chartmuseum/helm-push
     - helm cm-push --dependency-update CLOPS-helm-*.tgz vanillastack-harbor-cloudical-net
+
+.defaults:
+  cache: &global_cache
+    policy: pull-push
+    unprotect: false
+    untracked: false
+    when: on_success
+    key: "Helm-Dependency"
+    paths:
+      - Chart.lock
+      - charts/
