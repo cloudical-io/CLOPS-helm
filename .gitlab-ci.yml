@@ -23,7 +23,7 @@ build_dependency:
   cache:
     <<: *global_cache
   script:
-    - helm dependency build
+    - helm dependency update
 
 chart_scan:
   stage: test
@@ -36,7 +36,7 @@ chart_scan:
     - helm template clops -f values.yaml . > rendered.yaml
     - checkov -f rendered.yaml --framework kubernetes --no-guide
 
-template_test:
+template_dump:
   stage: test
   cache:
     <<: *global_cache
