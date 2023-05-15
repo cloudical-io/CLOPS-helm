@@ -80,5 +80,6 @@ push_chart:
     refs:
       - main
   script:
-    - helm plugin install https://github.com/chartmuseum/helm-push
+    ## Not needed since already present in container
+    #- helm plugin install https://github.com/chartmuseum/helm-push
     - helm cm-push --dependency-update CLOPS-helm-*.tgz vanillastack-harbor-cloudical-net
