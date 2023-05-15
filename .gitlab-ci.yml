@@ -9,15 +9,14 @@ stages:
 build_dependency:
   stage: prepare
   cache:
-  <<: *global_cache
+    <<: *global_cache
   script:
     - helm dependency build
-
 
 chart_scan:
   stage: test
   cache:
-  <<: *global_cache
+    <<: *global_cache
   script:
     - |
       pip3 install --upgrade pip && pip3 install --upgrade setuptools && \
@@ -28,7 +27,7 @@ chart_scan:
 template_test:
   stage: test
   cache:
-  <<: *global_cache
+    <<: *global_cache
   script:
     - helm template clops -f values.yaml .
 
@@ -53,6 +52,7 @@ push_chart:
     - helm plugin install https://github.com/chartmuseum/helm-push
     - helm cm-push --dependency-update CLOPS-helm-*.tgz vanillastack-harbor-cloudical-net
 
+# Define Global Definitions
 .defaults:
   cache: &global_cache
     policy: pull-push
