@@ -52,7 +52,7 @@ chart_scan:
     policy: pull
   script:
     - helm template clops -f values.yaml . > rendered.yaml
-    - checkov -f rendered.yaml --framework kubernetes -d $CI_PROJECT_DIR --skip-download
+    - checkov -f rendered.yaml --framework kubernetes -d .
 
 template_dump:
   stage: test
@@ -65,6 +65,7 @@ template_dump:
 build_chart:
   stage: build
   script:
+    - helm dependency update
     - helm package .
   artifacts:
     untracked: false
