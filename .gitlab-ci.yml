@@ -35,7 +35,7 @@ build_dockerimage:
     /kaniko/executor \
       --context $CI_PROJECT_DIR/docker \
       --dockerfile $CI_PROJECT_DIR/docker/Dockerfile \
-      --destination $CI_REGISTRY/$CI_REGISTRY_PROJECT/$CI_PROJECT_NAME:latest
+      --destination "$CI_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest"
 
 build_dependency:
   stage: prepare
@@ -45,7 +45,7 @@ build_dependency:
     - helm dependency update
 
 chart_scan:
-  image: $CI_REGISTRY/$CI_REGISTRY_PROJECT/$CI_PROJECT_NAME:latest
+  image: $CI_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest
   stage: test
   cache:
     <<: *global_cache
