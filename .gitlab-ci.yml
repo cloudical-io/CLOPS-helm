@@ -46,7 +46,6 @@ template_dump:
 build_chart:
   stage: build
   script:
-    - helm dependency build
     - helm package .
   artifacts:
     untracked: false
