@@ -52,7 +52,7 @@ chart_scan:
     policy: pull
   script:
     - helm template clops -f values.yaml . > rendered.yaml
-    - checkov -f rendered.yaml --framework kubernetes --no-guide
+    - checkov -f rendered.yaml --framework kubernetes -d $CI_PROJECT_DIR --skip-download
 
 template_dump:
   stage: test
