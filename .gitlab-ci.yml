@@ -6,6 +6,18 @@ stages:
   - build
   - push
 
+# Define Global Definitions
+.defaults:
+  cache: &global_cache
+    policy: pull-push
+    unprotect: false
+    untracked: false
+    when: on_success
+    key: "Helm-Dependency"
+    paths:
+      - Chart.lock
+      - charts/
+
 build_dependency:
   stage: prepare
   cache:
@@ -51,15 +63,3 @@ push_chart:
   script:
     - helm plugin install https://github.com/chartmuseum/helm-push
     - helm cm-push --dependency-update CLOPS-helm-*.tgz vanillastack-harbor-cloudical-net
-
-# Define Global Definitions
-.defaults:
-  cache: &global_cache
-    policy: pull-push
-    unprotect: false
-    untracked: false
-    when: on_success
-    key: "Helm-Dependency"
-    paths:
-      - Chart.lock
-      - charts/
