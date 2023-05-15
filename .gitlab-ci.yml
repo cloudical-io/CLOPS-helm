@@ -9,11 +9,11 @@ stages:
 # Define Global Definitions
 .defaults:
   cache: &global_cache
-    policy: pull-push
+    policy: push
     unprotect: false
-    untracked: false
+    untracked: true
     when: on_success
-    key: "Helm-Dependency"
+    key: "$CI_COMMIT_REF_SLUG"
     paths:
       - Chart.lock
       - charts/
@@ -29,6 +29,7 @@ chart_scan:
   stage: test
   cache:
     <<: *global_cache
+    policy: pull
   script:
     - |
       pip3 install --upgrade pip && pip3 install --upgrade setuptools && \
@@ -40,6 +41,7 @@ template_dump:
   stage: test
   cache:
     <<: *global_cache
+    policy: pull
   script:
     - helm template clops -f values.yaml .
 
