@@ -1,0 +1,84 @@
+image: docker.io/alpine/k8s:1.26.3
+
+stages:
+  - prepare
+  - test
+  - build
+  - push
+
+# Define Global Definitions
+.defaults:
+  cache: &global_cache
+    policy: push
+    unprotect: false
+    untracked: true
+    when: on_success
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - Chart.lock
+      - charts/
+
+# Prepare Docker access
+.kaniko:
+  before_script:
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${REGISTRY_USER}" "${REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+
+build_dockerimage:
+  stage: prepare
+  extends: .kaniko
+  only:
+    changes:
+      - docker/Docker
+    refs:
+      - main
+  script: |
+    /kaniko/executor \
+      --context $CI_PROJECT_DIR/docker \
+      --dockerfile $CI_PROJECT_DIR/docker/Dockerfile \
+      --destination "$CI_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest"
+
+build_dependency:
+  stage: prepare
+  cache:
+    <<: *global_cache
+  script:
+    - helm dependency update
+
+chart_scan:
+  image: $CI_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest
+  stage: test
+  cache:
+    <<: *global_cache
+    policy: pull
+  script:
+    - helm template clops -f values.yaml . > rendered.yaml
+    - checkov -f rendered.yaml --framework kubernetes -d .
+
+template_dump:
+  stage: test
+  cache:
+    <<: *global_cache
+    policy: pull
+  script:
+    - helm template clops -f values.yaml .
+
+build_chart:
+  stage: build
+  script:
+    - helm dependency update
+    - helm package .
+  artifacts:
+    untracked: false
+    when: on_success
+    expire_in: "30 days"
+    paths:
+      - "CLOPS-helm-*.tgz"
+
+push_chart:
+  stage: push
+  only:
+    refs:
+      - main
+  script:
+    - helm plugin install https://github.com/chartmuseum/helm-push
+    - helm cm-push --dependency-update CLOPS-helm-*.tgz vanillastack-harbor-cloudical-net
