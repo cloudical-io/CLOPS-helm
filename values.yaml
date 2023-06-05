@@ -283,7 +283,7 @@ grafana:
           disableDeletion: false
           editable: true
           options:
-            path: /var/lib/grafana/dashboards/default        
+            path: /var/lib/grafana/dashboards/default
         - name: "prometheus"
           orgId: 1
           folder: "Prometheus"
@@ -348,6 +348,8 @@ loki:
         region: "region-1"
         accessKeyId: "clops-test-key"
         secretAccessKey: "SUPERSECRETKEY"
+        s3ForcePathStyle: true
+        insecure: false
       gcs:
         chunkBufferSize: 0
         requestTimeout: "0s"
@@ -529,7 +531,7 @@ prometheus-blackbox-exporter:
     ## https://github.com/coreos/prometheus-operator for each target
     ##
     enabled: true
-    
+
     ## If true, a ServiceMonitor CRD is created for a prometheus operator
     ## https://github.com/coreos/prometheus-operator for blackbox-exporter itself
     ##
