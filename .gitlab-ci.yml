@@ -75,7 +75,7 @@ build_chart:
     when: on_success
     expire_in: "30 days"
     paths:
-      - "CLOPS-helm-*.tgz"
+      - "clops-helm-*.tgz"
 
 push_chart:
   stage: push
@@ -86,4 +86,4 @@ push_chart:
     ## Not needed since already present in container
     #- helm plugin install https://github.com/chartmuseum/helm-push
     - helm repo add clops-harbor-cloudical-net https://harbor.cloudical.net/chartrepo/clops
-    - helm cm-push --dependency-update CLOPS-helm-*.tgz clops-harbor-cloudical-net
+    - helm cm-push --dependency-update clops-helm-*.tgz clops-harbor-cloudical-net
