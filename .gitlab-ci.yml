@@ -31,7 +31,7 @@ build_dockerimage:
   extends: .kaniko
   only:
     changes:
-      - docker/Docker
+      - docker/Dockerfile
     refs:
       - main
   script: |
