@@ -38,7 +38,7 @@ build_dockerimage:
     /kaniko/executor \
       --context $CI_PROJECT_DIR/docker \
       --dockerfile $CI_PROJECT_DIR/docker/Dockerfile \
-      --destination "$CI_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest"
+      --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest"
 
 build_dependency:
   stage: prepare
