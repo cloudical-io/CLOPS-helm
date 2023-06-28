@@ -20,8 +20,8 @@ Installs various components to monitor your K8s cluster, including:
 Add the helm repo, edit the values.yaml to your liking and install the chart:
 
 ```
-helm repo add clops https://harbor.cloudical.net/chartrepo/clops
-helm upgrade --install --namespace clops --create-namespace clopsmonitoring clops/CLOPS-helm -f values.yaml
+helm repo add clops https://chartmuseum.cloudical.net/clops
+helm upgrade --install --namespace clops --create-namespace clopsmonitoring clops/clops-helm -f values.yaml
 ```
 
 ## Variables
