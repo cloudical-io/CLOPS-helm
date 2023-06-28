@@ -1,4 +1,4 @@
-image: docker.io/alpine/k8s:1.26.3
+image: docker.io/alpine/k8s:1.26.6
 
 stages:
   - prepare
@@ -55,7 +55,7 @@ chart_scan:
     policy: pull
   script:
     - helm template clops -f values.yaml . > rendered.yaml
-    - cat rendered.yaml | datree test -
+    - datree test --no-record --ignore-missing-schemas --schema-version 1.26.6 ./rendered.yaml
 
 template_dump:
   stage: test
