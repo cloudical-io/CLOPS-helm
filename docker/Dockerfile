@@ -1,9 +1,7 @@
-FROM bridgecrew/checkov:2.3.243
+FROM docker.io/datree/datreeci:latest as datree
 
-RUN apt-get update && \
-    apt-get install -y curl && \
-    rm -rf /var/cache/apt/*
+FROM docker.io/alpine/k8s:1.26.6
 
-RUN curl -fsSL -o - https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash -
+COPY --from=datree /usr/local/bin/datree /usr/local/bin/datree
 
 ENTRYPOINT [""]

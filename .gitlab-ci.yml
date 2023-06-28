@@ -21,7 +21,7 @@ stages:
 # Prepare Docker access
 .kaniko:
   before_script:
-    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${REGISTRY_USER}" "${REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"${CI_CONTAINER_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${REGISTRY_USER}" "${REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
 
 build_dockerimage:
   image:
@@ -48,14 +48,14 @@ build_dependency:
     - helm dependency update
 
 chart_scan:
-  image: $CI_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest
+  image: $CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest
   stage: test
   cache:
     <<: *global_cache
     policy: pull
   script:
     - helm template clops -f values.yaml . > rendered.yaml
-    - checkov -f rendered.yaml --framework kubernetes -d .
+    - cat rendered.yaml | datree test -
 
 template_dump:
   stage: test
@@ -85,5 +85,5 @@ push_chart:
   script:
     ## Not needed since already present in container
     #- helm plugin install https://github.com/chartmuseum/helm-push
-    - helm repo add clops-harbor-cloudical-net https://harbor.cloudical.net/chartrepo/clops
-    - helm cm-push --dependency-update clops-helm-*.tgz clops-harbor-cloudical-net
+    - helm repo add cloudical-clops "https://$CI_CHART_REGISTRY/$CI_REGISTRY_PROJECT"
+    - helm cm-push --dependency-update clops-helm-*.tgz cloudical-clops
