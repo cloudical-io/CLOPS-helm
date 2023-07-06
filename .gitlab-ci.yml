@@ -2,6 +2,7 @@ image: docker.io/alpine/k8s:1.26.6
 
 stages:
   - prepare
+  - update_check
   - test
   - build
   - push
@@ -39,6 +40,29 @@ build_dockerimage:
       --context $CI_PROJECT_DIR/docker \
       --dockerfile $CI_PROJECT_DIR/docker/Dockerfile \
       --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest"
+
+build_diff_container:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  stage: prepare
+  extends: .kaniko
+  only:
+    changes:
+      - docker/Dockerfile-k8s
+    refs:
+      - main
+  script: |
+    /kaniko/executor \
+      --context $CI_PROJECT_DIR \
+      --dockerfile $CI_PROJECT_DIR/docker/Dockerfile-k8s \
+      --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
+
+check_chart_for_updates:
+  stage: update_check
+  image: "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
+  script: |
+    sh -c /apps/getChartVersions.sh
 
 build_dependency:
   stage: prepare

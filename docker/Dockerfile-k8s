@@ -1,0 +1,18 @@
+FROM docker.io/alpine/k8s:1.27.3 AS base
+
+ARG VERSION=4.34.1
+
+RUN curl -fsSL -o /usr/bin/yq "https://github.com/mikefarah/yq/releases/download/v$VERSION/yq_linux_amd64"
+
+RUN apk update && \
+    apk add --no-cache libffi-dev build-base yaml-dev python3-dev
+
+RUN pip3 install ruamel.yaml deepdiff
+
+FROM base
+
+COPY ["./hack/", "/apps/"]
+
+RUN chmod +x "/apps/getChartVersions.sh"
+
+ENTRYPOINT ["sh", "-c", "/apps/getChartVersions.sh"]
