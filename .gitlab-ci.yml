@@ -61,8 +61,9 @@ build_diff_container:
 check_chart_for_updates:
   stage: update_check
   image: "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
-  script: |
-    sh -c /apps/getChartVersions.sh
+  script:
+    - cd /apps
+    - sh -c /apps/getChartVersions.sh
 
 build_dependency:
   stage: prepare
@@ -105,7 +106,7 @@ push_chart:
   stage: push
   only:
     refs:
-      - main
+      - tags
   script:
     ## Not needed since already present in container
     #- helm plugin install https://github.com/chartmuseum/helm-push
