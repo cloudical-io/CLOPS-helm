@@ -4,7 +4,6 @@ stages:
   - prepare
   - update_check
   - test
-  - build
   - release
   - push
 
@@ -25,7 +24,7 @@ stages:
   before_script:
     - echo "{\"auths\":{\"${CI_CONTAINER_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${REGISTRY_USER}" "${REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
 
-build ependency:
+build dependency:
   stage: prepare
   cache:
     <<: *global_cache
@@ -91,8 +90,27 @@ template dump:
   script:
     - helm template clops -f values.yaml .
 
+release:
+  image: $CI_CONTAINER_REGISTRY/cci-tools/semantic-release@sha256:3c237539f069b3ed5a863f9d02682ca5844a4c5cb3c1e2629043c33c56b93c6d
+  stage: release
+  script:
+    - semantic-release
+  only:
+    refs:
+      - main
+      - dev
+  except:
+    changes:
+      - "CHANGELOG.md"
+
 build chart:
-  stage: build
+  stage: push
+  only:
+    refs:
+      - tags
+  except:
+    refs:
+      - branches
   script:
     - helm dependency update
     - helm package .
@@ -103,24 +121,16 @@ build chart:
     paths:
       - "clops-helm-*.tgz"
 
-release:
-  image: $CI_CONTAINER_REGISTRY/cci-tools/semantic-release@sha256:3c237539f069b3ed5a863f9d02682ca5844a4c5cb3c1e2629043c33c56b93c6d
-  stage: release
-  script:
-    - semantic-release
-  only:
-    - main
-    - dev
-  except:
-    changes:
-      - "CHANGELOG.md"
-
 push chart:
   stage: push
+  needs:
+    - "build chart"
   only:
-    - tags
+    refs:
+      - tags
   except:
-    - branches
+    refs:
+      - branches
   script:
     ## Not needed since already present in container
     #- helm plugin install https://github.com/chartmuseum/helm-push
