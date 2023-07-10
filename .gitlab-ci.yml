@@ -85,6 +85,7 @@ check chart for updates:
     <<: *skip_tags
   allow_failure: true
   script:
+    - cd /apps
     - sh -c /apps/getChartVersions.sh
 
 ## scans the chart with datree
