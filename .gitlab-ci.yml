@@ -4,7 +4,7 @@ stages:
   - prepare
   - update_check
   - test
-  - build
+  - release
   - push
 
 # Define Global Definitions
@@ -18,17 +18,33 @@ stages:
     paths:
       - Chart.lock
       - charts/
+  except: &skip_tags
+    refs:
+      - tags
 
 # Prepare Docker access
 .kaniko:
   before_script:
     - echo "{\"auths\":{\"${CI_CONTAINER_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${REGISTRY_USER}" "${REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
 
-build_dockerimage:
+## Builds the dependency-cache for consecutive stages
+build dependency:
+  stage: prepare
+  except:
+    <<: *skip_tags
+  cache:
+    <<: *global_cache
+  script:
+    - helm dependency update
+
+## builds the datree image
+scanner image:
+  stage: prepare
+  except:
+    <<: *skip_tags
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
-  stage: prepare
   extends: .kaniko
   only:
     changes:
@@ -39,13 +55,16 @@ build_dockerimage:
     /kaniko/executor \
       --context $CI_PROJECT_DIR/docker \
       --dockerfile $CI_PROJECT_DIR/docker/Dockerfile \
-      --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest"
+      --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/datree-scanner:latest"
 
-build_diff_container:
+## builds the diff-image for version comparisons
+yaml diff image:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   stage: prepare
+  except:
+    <<: *skip_tags
   extends: .kaniko
   only:
     changes:
@@ -58,41 +77,67 @@ build_diff_container:
       --dockerfile $CI_PROJECT_DIR/docker/Dockerfile-k8s \
       --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
 
-check_chart_for_updates:
-  stage: update_check
+## runs the diff-image and prints out updates
+check chart for updates:
   image: "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
+  stage: update_check
+  except:
+    <<: *skip_tags
+  allow_failure: true
   script:
-    - cd /apps
     - sh -c /apps/getChartVersions.sh
 
-build_dependency:
-  stage: prepare
-  cache:
-    <<: *global_cache
-  script:
-    - helm dependency update
-
-chart_scan:
-  image: $CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest
+## scans the chart with datree
+chart scan:
+  image: $CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/datree-scanner:latest
   stage: test
+  except:
+    <<: *skip_tags
   cache:
     <<: *global_cache
     policy: pull
   script:
     - helm template clops -f values.yaml . > rendered.yaml
-    - datree test --no-record --ignore-missing-schemas --schema-version 1.26.6 ./rendered.yaml || true
+    - datree test --no-record --ignore-missing-schemas --schema-version 1.27.3 ./rendered.yaml || true
 
-template_dump:
+## prints out the templated chart
+## if this fails there is an error in the chart vlaues
+template dump:
   stage: test
+  except:
+    <<: *skip_tags
   cache:
     <<: *global_cache
     policy: pull
   script:
     - helm template clops -f values.yaml .
 
-build_chart:
-  stage: build
+## semantic-release
+release:
+  image: $CI_CONTAINER_REGISTRY/cci-tools/semantic-release@sha256:3c237539f069b3ed5a863f9d02682ca5844a4c5cb3c1e2629043c33c56b93c6d
+  stage: release
   script:
+    - semantic-release
+  only:
+    refs:
+      - main
+      - dev
+  except:
+    changes:
+      - "CHANGELOG.md"
+
+## builds the chart on a new release
+build chart:
+  stage: push
+  only:
+    refs:
+      - tags
+  except:
+    refs:
+      - branches
+  script:
+    - |
+      sed -i "s/^version:.*$/version: $CI_COMMIT_TAG/g" Chart.yaml
     - helm dependency update
     - helm package .
   artifacts:
@@ -102,11 +147,17 @@ build_chart:
     paths:
       - "clops-helm-*.tgz"
 
-push_chart:
+## pushes the chart on a new release
+push chart:
   stage: push
+  needs:
+    - "build chart"
   only:
     refs:
       - tags
+  except:
+    refs:
+      - branches
   script:
     ## Not needed since already present in container
     #- helm plugin install https://github.com/chartmuseum/helm-push

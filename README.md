@@ -12,6 +12,9 @@ Installs various components to monitor your K8s cluster, including:
 - [Loki](https://github.com/grafana/loki/tree/main/production/helm/loki)
 - [Prometheus Blackbox Exporter](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-blackbox-exporter)
 
+## Upgrading
+Please see the [UPGRADING.md](./UPGRADING.md) for infos on breaking changes or extra changes.
+
 ## Requirements
 - An already running K8s cluster
 - [Helm](https://helm.sh)

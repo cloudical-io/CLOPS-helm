@@ -30,17 +30,17 @@ dependencies:
     condition: kube-prometheus-stack.enabled
 
   - name: metrics-server
-    version: "3.8.*"
+    version: "3.10.*"
     repository: "https://kubernetes-sigs.github.io/metrics-server/"
     condition: metrics-server.enabled
 
   - name: grafana
-    version: "6.54.*"
+    version: "6.57.*"
     repository: "https://grafana.github.io/helm-charts"
     condition: grafana.enabled
 
   - name: loki
-    version: "5.0.*"
+    version: "5.8.*"
     repository: "https://grafana.github.io/helm-charts"
     condition: loki.enabled
 
@@ -50,6 +50,6 @@ dependencies:
     condition: promtail.enabled
 
   - name: prometheus-blackbox-exporter
-    version: "7.7.*"
+    version: "7.12.*"
     repository: https://prometheus-community.github.io/helm-charts
     condition: prometheus-blackbox-exporter.enabled
