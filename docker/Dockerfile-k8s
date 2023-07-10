@@ -13,6 +13,8 @@ FROM base
 
 COPY ["./hack/", "/apps/"]
 
-RUN chmod +x "/apps/getChartVersions.sh"
+RUN chmod +x -R "/apps"
 
-ENTRYPOINT ["sh", "-c", "/apps/getChartVersions.sh"]
+## Allow overriding params
+ENTRYPOINT ["sh", "-c"]
+CMD ["/apps/getChartVersions.sh"]

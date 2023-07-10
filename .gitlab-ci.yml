@@ -5,6 +5,7 @@ stages:
   - update_check
   - test
   - build
+  - release
   - push
 
 # Define Global Definitions
@@ -24,11 +25,18 @@ stages:
   before_script:
     - echo "{\"auths\":{\"${CI_CONTAINER_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${REGISTRY_USER}" "${REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
 
-build_dockerimage:
+build ependency:
+  stage: prepare
+  cache:
+    <<: *global_cache
+  script:
+    - helm dependency update
+
+scanner image:
+  stage: prepare
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
-  stage: prepare
   extends: .kaniko
   only:
     changes:
@@ -39,13 +47,13 @@ build_dockerimage:
     /kaniko/executor \
       --context $CI_PROJECT_DIR/docker \
       --dockerfile $CI_PROJECT_DIR/docker/Dockerfile \
-      --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest"
+      --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/datree-scanner:latest"
 
-build_diff_container:
+yaml diff image:
+  stage: prepare
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
-  stage: prepare
   extends: .kaniko
   only:
     changes:
@@ -58,28 +66,24 @@ build_diff_container:
       --dockerfile $CI_PROJECT_DIR/docker/Dockerfile-k8s \
       --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
 
-check_chart_for_updates:
+check chart for updates:
   stage: update_check
   image: "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
-
-build_dependency:
-  stage: prepare
-  cache:
-    <<: *global_cache
+  allow_failure: true
   script:
-    - helm dependency update
+    - sh -c /apps/getChartVersions.sh
 
-chart_scan:
-  image: $CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/$CI_CONTAINER_NAME:latest
+chart scan:
+  image: $CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/datree-scanner:latest
   stage: test
   cache:
     <<: *global_cache
     policy: pull
   script:
     - helm template clops -f values.yaml . > rendered.yaml
-    - datree test --no-record --ignore-missing-schemas --schema-version 1.26.6 ./rendered.yaml || true
+    - datree test --no-record --ignore-missing-schemas --schema-version 1.27.3 ./rendered.yaml || true
 
-template_dump:
+template dump:
   stage: test
   cache:
     <<: *global_cache
@@ -87,7 +91,7 @@ template_dump:
   script:
     - helm template clops -f values.yaml .
 
-build_chart:
+build chart:
   stage: build
   script:
     - helm dependency update
@@ -99,13 +103,28 @@ build_chart:
     paths:
       - "clops-helm-*.tgz"
 
-push_chart:
+release:
+  image: $CI_CONTAINER_REGISTRY/cci-tools/semantic-release@sha256:3c237539f069b3ed5a863f9d02682ca5844a4c5cb3c1e2629043c33c56b93c6d
+  stage: release
+  script:
+    - semantic-release
+  only:
+    - main
+    - dev
+  except:
+    changes:
+      - "CHANGELOG.md"
+
+push chart:
   stage: push
   only:
-    refs:
-      - main
+    - tags
+  except:
+    - branches
   script:
     ## Not needed since already present in container
     #- helm plugin install https://github.com/chartmuseum/helm-push
+    - |
+      sed -i "s/version:.*$/version: $CI_COMMIT_TAG/g" Chart.yaml
     - helm repo add cloudical-clops "https://$CI_CHART_REGISTRY/$CI_REGISTRY_PROJECT"
     - helm cm-push --dependency-update clops-helm-*.tgz cloudical-clops

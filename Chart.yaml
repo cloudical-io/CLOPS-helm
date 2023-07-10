@@ -15,7 +15,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.2
+version: 0.2.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -25,31 +25,31 @@ appVersion: "0.0.0"
 
 dependencies:
   - name: kube-prometheus-stack
-    version: "45.18.*"
+    version: 2.0.33
     repository: "https://prometheus-community.github.io/helm-charts"
     condition: kube-prometheus-stack.enabled
 
   - name: metrics-server
-    version: "3.8.*"
+    version: 2.0.33
     repository: "https://kubernetes-sigs.github.io/metrics-server/"
     condition: metrics-server.enabled
 
   - name: grafana
-    version: "6.54.*"
+    version: 2.0.33
     repository: "https://grafana.github.io/helm-charts"
     condition: grafana.enabled
 
   - name: loki
-    version: "5.0.*"
+    version: 2.0.33
     repository: "https://grafana.github.io/helm-charts"
     condition: loki.enabled
 
   - name: promtail
-    version: "6.11.*"
+    version: 2.0.33
     repository: "https://grafana.github.io/helm-charts"
     condition: promtail.enabled
 
   - name: prometheus-blackbox-exporter
-    version: "7.7.*"
+    version: 2.0.33
     repository: https://prometheus-community.github.io/helm-charts
     condition: prometheus-blackbox-exporter.enabled

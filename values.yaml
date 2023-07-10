@@ -195,7 +195,7 @@ metrics-server:
   replicas: 2
   # ServiceMonitor configuration
   serviceMonitor:
-    enabled: false
+    enabled: true
   defaultArgs:
     - --cert-dir=/tmp
     - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
