@@ -1,3 +1,10 @@
+# [0.2.0-rc.2](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/compare/0.2.0-rc.1...0.2.0-rc.2) (2023-07-10)
+
+
+### Bug Fixes
+
+* ci ([6174f16](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/commit/6174f16dec99755eb7848f264e288798d1914c68))
+
 # [0.2.0-rc.1](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/compare/v0.1.1...0.2.0-rc.1) (2023-07-10)
 
 
