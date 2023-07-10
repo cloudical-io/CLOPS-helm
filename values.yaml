@@ -398,9 +398,22 @@ loki:
       username: testloki
       # -- The basic auth password for the gateway
       password: testlokipassword
+  # disabling self monitoring componets
+  # breaking grafana etc.
+  monitoring:
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        installOperator: false
+    lokiCanary:
+      enabled: false
   grafana-agent-operator:
     # -- Override the full names of all resources
     fullnameOverride: loki-grafana-agent-operator
+  # need to disable helm chart test since we disable the self monitoring
+  # and the chart tests depends on them
+  test:
+    enabled: false
 
 # Promtail Config
 promtail:
