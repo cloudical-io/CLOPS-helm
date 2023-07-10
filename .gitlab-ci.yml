@@ -144,10 +144,6 @@ build chart:
     expire_in: "30 days"
     paths:
       - "clops-helm-*.tgz"
-  release:
-    tag_name: $CI_COMMIT_TAG
-    name: "Release $CI_COMMIT_TAG"
-    description: "New Release by the Semver pipeline"
 
 ## pushes the chart on a new release
 push chart:
