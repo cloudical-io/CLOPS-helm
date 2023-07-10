@@ -1,3 +1,11 @@
+## [0.2.1](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/compare/0.2.0...0.2.1) (2023-07-10)
+
+
+### Bug Fixes
+
+* **loki:** missing labels ([adc4897](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/commit/adc4897c94ae0e10399d5334991fb0c16617a451))
+* **loki:** monitoring components ([fee7d28](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/commit/fee7d28d4674bfa4580f029dbfa96fd9a03952eb))
+
 # [0.2.0](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/compare/v0.1.1...0.2.0) (2023-07-10)
 
 
