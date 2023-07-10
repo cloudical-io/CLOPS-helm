@@ -18,6 +18,9 @@ stages:
     paths:
       - Chart.lock
       - charts/
+  except: &skip_tags
+    refs:
+      - tags
 
 # Prepare Docker access
 .kaniko:
@@ -26,6 +29,8 @@ stages:
 
 build dependency:
   stage: prepare
+  except:
+    <<: *skip_tags
   cache:
     <<: *global_cache
   script:
@@ -33,6 +38,8 @@ build dependency:
 
 scanner image:
   stage: prepare
+  except:
+    <<: *skip_tags
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -49,10 +56,12 @@ scanner image:
       --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/datree-scanner:latest"
 
 yaml diff image:
-  stage: prepare
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
+  stage: prepare
+  except:
+    <<: *skip_tags
   extends: .kaniko
   only:
     changes:
@@ -66,8 +75,10 @@ yaml diff image:
       --destination "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
 
 check chart for updates:
-  stage: update_check
   image: "$CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/diff-image:latest"
+  stage: update_check
+  except:
+    <<: *skip_tags
   allow_failure: true
   script:
     - sh -c /apps/getChartVersions.sh
@@ -75,6 +86,8 @@ check chart for updates:
 chart scan:
   image: $CI_CONTAINER_REGISTRY/$CI_REGISTRY_PROJECT/datree-scanner:latest
   stage: test
+  except:
+    <<: *skip_tags
   cache:
     <<: *global_cache
     policy: pull
@@ -84,6 +97,8 @@ chart scan:
 
 template dump:
   stage: test
+  except:
+    <<: *skip_tags
   cache:
     <<: *global_cache
     policy: pull
