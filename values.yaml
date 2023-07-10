@@ -418,7 +418,7 @@ promtail:
       memory: 135Mi
   # Extra args for the Promtail container.
   extraArgs:
-    - -client.external-labels=hostname=$(HOSTNAME)
+    - -client.external-labels=environment=clops,hostname=$(HOSTNAME)
   # ServiceMonitor configuration
   serviceMonitor:
     enabled: true
