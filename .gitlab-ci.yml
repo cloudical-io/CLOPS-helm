@@ -122,9 +122,6 @@ release:
     refs:
       - main
       - dev
-  except:
-    changes:
-      - "CHANGELOG.md"
 
 ## builds the chart on a new release
 build chart:
