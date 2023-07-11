@@ -15,6 +15,8 @@ COPY ["./hack/", "/apps/"]
 
 RUN chmod +x -R "/apps"
 
+WORKDIR "/apps"
+
 ## Allow overriding params
 ENTRYPOINT ["sh", "-c"]
 CMD ["/apps/getChartVersions.sh"]
