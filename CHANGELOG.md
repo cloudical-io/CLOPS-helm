@@ -1,3 +1,16 @@
+# [1.0.0-rc.1](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/compare/0.2.1...1.0.0-rc.1) (2023-07-11)
+
+
+### update
+
+* **clops:** kube prometheus stack major bump ([4746d69](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/commit/4746d697c8717f9b63fc36f7664b8d91947c951c))
+
+
+### BREAKING CHANGES
+
+* **clops:** Update kube-prom-stack to 46.x Please check the UPGRADING.md for infos
+on how to upgrade the stack.
+
 ## [0.2.1](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/compare/0.2.0...0.2.1) (2023-07-10)
 
 
