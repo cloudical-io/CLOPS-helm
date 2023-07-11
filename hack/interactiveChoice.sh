@@ -31,10 +31,14 @@ print_divider () {
 }
 
 get_chart_in_version() {
-    printf "\tEnter the %s version you want \n\tin Format 'X.Y.Z' or 'X.Y.*'\n\tChoice > " "$1"
+    print_divider
+    printf "\tEnter the %s version you want \n\tin Format 'X.Y.Z', 'X.Y.*' or 'X.Y'\n\tChoice > " "$1"
     V=`read_input`
-    printf "\tRequesting Chart %s in Version %s\n" "$1" "$V"
-    helm show values "$1/$1" --version "$V" > "$SELECTED_NEW_VALUES" || get_chart_in_version $1
+    printf "\n\tRequesting Chart %s in Version %s\n" "$1" "$V"
+    FETCH_V=`helm show chart "$1/$1" --version "$V" 2>/dev/null | yq '.version'`
+    helm show values "$1/$1" --version "$V" > "$SELECTED_NEW_VALUES" \
+        && printf "\tFound Version %s\n" "$FETCH_V" \
+        || get_chart_in_version $1
 }
 
 print_dependencies() {

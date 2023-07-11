@@ -13,6 +13,9 @@ kube-prometheus-stack:
   # Disable grafana, so we can deploy it by our conditions
   grafana:
     enabled: false
+  # Flag to disable all the kubernetes component scrapers
+  kubernetesServiceMonitors:
+    enabled: true
   # Create default rules for monitoring the cluster
   defaultRules:
     # Labels for default rules

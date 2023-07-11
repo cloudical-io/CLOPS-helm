@@ -1,3 +1,4 @@
 charts/
 .vscode
 values-*.yaml
+*.tgz

@@ -1,13 +1,13 @@
 dependencies:
 - name: kube-prometheus-stack
   repository: https://prometheus-community.github.io/helm-charts
-  version: 45.18.0
+  version: 46.8.0
 - name: metrics-server
   repository: https://kubernetes-sigs.github.io/metrics-server/
   version: 3.10.0
 - name: grafana
   repository: https://grafana.github.io/helm-charts
-  version: 6.57.4
+  version: 6.58.2
 - name: loki
   repository: https://grafana.github.io/helm-charts
   version: 5.8.9
@@ -16,6 +16,6 @@ dependencies:
   version: 6.11.5
 - name: prometheus-blackbox-exporter
   repository: https://prometheus-community.github.io/helm-charts
-  version: 7.12.0
-digest: sha256:ec9fbb257da118c6bc230f4368c6725425fddaf36f00926bc8807666b09df720
-generated: "2023-07-10T12:46:00.364573797+02:00"
+  version: 8.0.0
+digest: sha256:a7f18959c7ef3d430fb9872f28183b47984a1555be1463b11e0ba7f1eedaca76
+generated: "2023-07-11T14:54:46.640239653+02:00"
