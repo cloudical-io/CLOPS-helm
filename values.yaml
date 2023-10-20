@@ -338,6 +338,10 @@ loki:
   fullnameOverride: loki
   # Loki Configuration
   loki:
+    # -- Tenants / Users
+    tenants:
+      - name: myuser
+        password: mypassword
     # -- Storage config. Providing this will automatically populate all necessary storage configs in the templated config.
     storage:
       bucketNames:
@@ -395,12 +399,15 @@ loki:
             - loki.your.doma.in
     # Basic auth configuration
     basicAuth:
-      # -- Enables basic authentication for the gateway
       enabled: true
-      # -- The basic auth username for the gateway
-      username: testloki
-      # -- The basic auth password for the gateway
-      password: testlokipassword
+      htpasswd: >-
+        {{ if .Values.loki.tenants }}
+          {{- range $t := .Values.loki.tenants }}
+          {{ htpasswd (required "All tenants must have a 'name' set" $t.name) (required "All tenants must have a 'password' set" $t.password) }}
+          {{- end }}
+        {{ else }} 
+          {{ htpasswd (required "'gateway.basicAuth.username' is required" .Values.gateway.basicAuth.username) (required "'gateway.basicAuth.password' is required" .Values.gateway.basicAuth.password) }}
+        {{ end }}
   # disabling self monitoring componets
   # breaking grafana etc.
   monitoring:
@@ -440,6 +447,7 @@ promtail:
     enabled: true
   # Promtail config file options
   config:
+    enabled: true
     # -- The log level of the Promtail server
     logLevel: warn
     # -- The config of clients of the Promtail server
