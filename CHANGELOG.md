@@ -1,3 +1,10 @@
+# [1.1.0](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/compare/1.0.0...1.1.0) (2023-10-20)
+
+
+### Features
+
+* bump chart versions ([0535fb5](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/commit/0535fb5ef384ad2f663726358d257b98dc36fadc))
+
 # [1.0.0](https://gitlab.cloudical.net/clops-monitoring-platform/clops-helm/compare/0.2.1...1.0.0) (2023-07-11)
 
 
